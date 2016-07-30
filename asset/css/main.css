@@ -1,0 +1,230 @@
+html, body {
+	padding: 0;
+	margin: 0;
+	height: 100%;
+	background: #fff;
+}
+#header {
+	/*background-color: #8C0502;*/
+	position: relative;
+	overflow: visible;
+}
+#headerTop {
+	height: 25px;
+}
+#headerMid {
+	height: 50px;
+	padding: 0 25px;
+	position: relative;
+}
+#headerMid > * {
+	vertical-align: middle;
+}
+#headerMid span {
+	color: #313236;
+	font-family: helvetica, arial, verdana, sans-serif;
+	line-height: 18px;
+	font-size: 12px;
+	cursor: pointer;
+	margin: 5px;
+}
+#headerMid span:hover{
+	color: #D60200;
+}
+#headerMid::after{
+    content: url(../images/uniga-logo.png);
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+	left: 25px;
+}
+#headerBot {
+	height: 25px;
+	overflow: visible;
+}
+#headerBot a{
+	text-decoration: none;
+	display: block;
+}
+#headerBot ul{
+	list-style: outside none none;
+}
+#headerBot ul{
+	margin-bottom: 0;
+    margin-top: 0;
+    padding-left: 0;
+}
+#headerBot > ul{
+	height: 100%;
+	box-sizing: border-box;
+}
+#headerBot li{
+	position: relative;
+}
+#headerBot > ul > li{
+	float: left;
+	color: #666;
+    font-family: helvetica,arial,verdana,sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 18px;
+	height: 100%;
+	box-sizing: border-box;
+	cursor: pointer;
+	margin: 0 5px;
+}
+#headerBot > ul > li ul a{
+	border-radius: 2px;
+    font-size: 13px;
+    margin: 0 5px;
+    padding: 10px 20px;
+    transition: all 150ms linear 0s;
+	box-sizing: border-box;
+	font-family: "Roboto","Helvetica","Arial",sans-serif;
+	font-weight: 400;
+    line-height: 1.42857;
+}
+#headerBot > ul > li ul a:hover{
+	background: #D60200;/*#03a9f4;*/
+    /*transition: all 150ms linear 0s;*/
+	box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12), 0 5px 5px -3px rgba(0, 0, 0, 0.2);
+	color: #fff;
+}
+#headerBot a{
+	color: #666;
+	padding: 5px;
+	white-space: nowrap;
+}
+#headerBot a:hover{
+	color: #D60200;
+}
+#headerBot > ul > li:hover:after, #headerBot > ul > li.selected:after{
+	content: "";
+	height: 5px;
+	position: absolute;
+	width: 100%;
+	top: 100%;
+	left: 0px;
+	width: 100%;
+	background: #D60200;
+}
+#headerBot > ul > li > ul{
+	display: none;
+	position: absolute;
+	z-index: 100000001;
+	background: #fff;
+	/*padding: 5px 10px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);*/
+	box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+    min-width: 160px;
+    padding: 5px 0;
+	border-radius: 3px;
+}
+#headerBot > ul ul{
+	display: none;
+	transition: all 0.2s ease-in-out;
+}
+#headerBot > ul > li > ul{
+	top: 100%;
+	transform: translateY(5px);
+}
+/*#headerBot > ul > li > ul ul{
+	top: 0;
+	left: 100%;
+	transform: translateX(10px);
+}*/
+#content {
+	position: relative;
+	overflow: auto;
+	background-image: url("../images/swirl_pattern.png");
+}
+#content[loading=true]:after{
+	content: "";
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	background: rgba(255,255,255,0.7);
+	top: 0;
+	left: 0;
+}
+.j-vertical-flex {
+	display: inline-block;
+	display: -webkit-box;
+	display: -moz-box;
+	display: -ms-flexbox;
+	display: -webkit-flex;
+	display: flex;
+	-webkit-box-orient: vertical;
+	-moz-box-orient: vertical;
+	-webkit-flex-direction: column;
+	-ms-flex-direction: column;
+	flex-direction: column;
+}
+
+/* pattern */
+
+/*.reddot {
+	background-image: -webkit-repeating-radial-gradient(center center, rgba(183, 28, 28, 0.9), rgba(183, 28, 28, 0.9) 1px, transparent 1px, transparent 100%);
+	background-image: -moz-repeating-radial-gradient(center center, rgba(183, 28, 28, 0.9), rgba(183, 28, 28, 0.9) 1px, transparent 1px, transparent 100%);
+	background-image: -ms-repeating-radial-gradient(center center, rgba(183, 28, 28, 0.9), rgba(183, 28, 28, 0.9) 1px, transparent 1px, transparent 100%);
+	background-image: repeating-radial-gradient(center center, rgba(183, 28, 28, 0.9), rgba(183, 28, 28, 0.9) 1px, transparent 1px, transparent 100%);
+	-webkit-background-size: 3px 3px;
+	-moz-background-size: 3px 3px;
+	background-size: 3px 3px;
+}*/
+.center {
+	position: absolute;
+	margin: auto;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	width: 100px;
+	height: 100px;
+	display: inline-block;
+}
+.border-radius {
+	border-radius: 4px;
+}
+.j-spacer {
+	flex: 1 1 0;
+	-webkit-box-flex: 1;
+	-webkit-flex: 1;
+}
+label {
+	font-size: 12px;
+	font-family: helvetica, arial, verdana, sans-serif;
+	line-height: 18px;
+}
+
+/* login */
+
+#frmLogin {
+	background: #fff;
+	height: 160px;
+	width: 313px;
+	border: 1px solid #d9d9d9;
+	padding: 10px 0px;
+}
+#frmLogin > div:first-child {
+	background-color: #008FD7;
+	color: #fff;
+	margin-top: 10px;
+}
+#frmLogin > div:first-child > * {
+	vertical-align: middle;
+	font-size: 20px;
+	font-weight: 900;
+	font-family: verdana;
+}
+	#frmLogin > div:first-child > img{
+		float: left;
+    	transform: translateY(-25%);
+		margin-left: 10px;
+	}
+#frmLogin > div:last-child {
+	padding: 10px;
+}
+.contentGrey{
+	background-color: #F9F8F3;
+}

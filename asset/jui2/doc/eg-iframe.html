@@ -1,0 +1,30 @@
+<script src="../jquery.js"></script>
+<script src="../library.min.js"></script>
+<script>Swag.registerHelpers(Handlebars);</script>
+
+<!--link rel="stylesheet/less" type="text/css" href="less/styles.less" />
+<script src="lib/less-1.6.3.min.js"></script-->
+<link rel="stylesheet" href="../jui2.min.css">
+<link rel="stylesheet" href="../font-awesome.min.css">
+
+<script src="../jui2.min.js"></script>
+<script src="../templates.min.js"></script>
+<script src="../helpers.min.js"></script>
+ <script type="text/javascript">
+	function loadInlineExample(code, options, callback) {
+		try {
+			document.body.innerHTML = '';
+			eval(code);
+			callback && callback(true);
+		} catch (e) {
+			try {
+				document.body.innerHTML = code
+				eval($('body script').text())
+			}
+			catch(e){
+				document.body.innerHTML = e;
+				callback && callback(false, e);
+			}
+		}
+	}
+</script>

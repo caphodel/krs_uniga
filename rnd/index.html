@@ -1,0 +1,590 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+	<script>
+	var jui2 = jui2 || {
+		ui:{}
+	};
+	</script>
+    <script src="jquery.js"></script>
+    <script src="dist/jui2.lib.min.js"></script>
+    <script src="dist/jui2.tmp.min.js"></script>
+    <script src="dist/jui2.ui.js"></script>
+    <script src="dist/extension/tab/tab.js"></script>
+	<link rel="stylesheet" type="text/css" href="dist/css/jui2.min.css" />
+	<link rel="stylesheet" type="text/css" href="dist/extension/tab/tab.css" />
+	<link rel="stylesheet" type="text/css" href="css/font-awesome.min.css" />
+  <style>
+
+  </style>
+  <script>
+  jui2.loadExtension()
+  </script>
+</head>
+<body>
+<div id="searchHover"></div>
+<div id="demoapp">
+  <j-toolbar id="topbar">
+    <span><span style="color: #E61345">P</span>roject&nbsp;<span style="color: #E61345">M</span>anagement</h5></span>
+    <j-spacer></j-spacer>
+    <j-textfield id="search" icon="fa-search"></j-textfield>
+  </j-toolbar>
+</div>
+<script>
+$('#search').on('keyup', function(e){
+  if (e.keyCode == 13) {
+    if($('#searchModal').length==0){
+      $('body').append(
+        '<j-modal id="searchModal" snappos="topleft to bottomleft" snapto="#search" center="false" width="165px">\
+          <j-table id="searchResult">\
+            <j-custom>\
+              function(record){\
+                return "<div><div><span>"+record[2]+"</span><br>"+record[1]+"</div><div>"+record[5]+"</div></div>"\
+              }\
+            </j-custom>\
+            <j-loader src="http://gggmpscdweb05/gg_beta/index.php/emres_sppb/get_data"></j-loader>\
+            [["text"]]\
+            <j-pagination></j-pagination>\
+          </j-table>\
+        </j-modal>');
+      $('#searchResult').on('afterdraw', function(){
+        $('#searchResult td').on('mouseover', function(){
+          var position = $(this).offset()
+          $('#searchHover').css({
+            top: position.top,
+            left: position.left-17,
+            height: $(this).outerHeight(),
+            "z-index": $('#searchModal').css('z-index')+1
+          }).show().html($(this).html())
+        })
+        $(this).find('.j-itemPerPage, span:contains(items per page), .j-total, .fa-refresh').remove()
+      })
+    }
+    else{
+
+    }
+  }
+})
+
+$('body').on('mouseover', function(e){
+  if($(e.target).parents('#searchHover').length == 0 && $(e.target).parents('#searchResult').length == 0 && $(e.target).attr('id') != 'searchHover')
+    $('#searchHover').hide()
+}).on('click', function(e){
+  if($(e.target).parents('#searchHover').length == 0 && $(e.target).parents('#searchResult').length == 0 && $(e.target).attr('id') != 'searchHover')
+    $('#searchModal').remove()
+})
+</script>
+<style>
+#topbar > span{
+  font-weight: 600;
+  font-size: 16px;
+  font-family: helvetica,arial,verdana,sans-serif;
+}
+#topbar{
+  background: #fff;
+  border-top: 0px;
+  border-left: 0px;
+  border-right: 0px;
+}
+#demoapp #search input{
+  border-radius: 4px;
+  padding-left: 15px;
+  padding-right: 30px;
+  /*padding-top: 5px;
+  padding-bottom: 5px;*/
+}
+#demoapp #search .fa-search{
+  margin-left: -25px;
+}
+
+#searchModal{
+  padding: 0px;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-family: verdana !important;
+  border-radius: 4px;
+}
+
+#searchModal j-pagination{
+  background: #fff;
+}
+
+#searchModal .j-disable::after{
+  width: 0px;
+  height: 0px;
+}
+
+#searchHover{
+  background: #282828;
+  position: absolute;
+  display: inline-block;
+  width: 200px;
+  font-size: 12px;
+  font-family: helvetica,arial,verdana,sans-serif;
+  line-height: 18px;
+  padding-left: 17px;
+  padding-right: 18px;
+  font-size: 12px;
+  box-sizing: border-box;
+  color: #fff;
+  border-radius: 4px;
+}
+
+#searchModal j-table{
+  border: 0px;
+}
+
+#searchModal j-table tr td{
+  padding: 0px;
+}
+
+#searchModal j-table tr td div{
+  position: relative;
+}
+
+#searchModal j-table tr:hover td{
+  background: none;
+  overflow: visible;
+}
+
+#searchModal j-table tr:hover td div,
+#searchHover div
+{
+  background: #282828;
+  color: #fff;
+}
+
+#searchModal j-table tr:hover td div::after{
+  background: inherit;
+  position: absolute;
+  width: 110%;
+  height: 100%;
+  left: -5%;
+  top: 0px;
+  content: "";
+  z-index: -1;
+}
+
+#searchModal thead th{
+  display: none;
+}
+
+#searchResult td div div:first-child,
+#searchHover div div:first-child{
+  display: inline-block;
+  width: 50%;
+  word-wrap: break-word;
+}
+
+#searchResult td div
+{
+  font-weight: 600;
+  color: #38444D;
+}
+
+#searchHover div{
+  font-weight: 600;
+}
+
+#searchResult td div div:first-child span,
+#searchHover div div:first-child span{
+  color: #65B6F7;
+  font-size: 10px;
+}
+
+#searchResult td div div:last-child,
+#searchHover div div:last-child{
+  display: inline-block;
+  width: 50%;
+  text-align: right;
+}
+</style>
+<!--j-modal id="modal" title="&nbsp;" app="true" drag="true" height="300px" width="500px">
+  <img width="250px" height="250px" src="banana.jpg" style="z-index: -2;"></img>
+	<j-button>INFOS</j-button>
+</j-modal>
+<script>
+//$('#modal').attr('drag', 'j-modal')
+</script>
+<style>
+  #modal img{
+    position: absolute;
+    right: 50%;
+    transform: translateX(50%);
+    top: 10px;
+  }
+
+  #modal .j-modal-title{
+    border-bottom: 0px;
+    background: none;
+  }
+
+  #modal::after{
+    position: absolute;
+    content: "Banana";
+    color: #fff;
+    font-size: 21px;
+    font-family: comic sans ms;
+    top: 0px;
+    left: 0px;
+    padding: 20px;
+    font-weight: 900;
+    z-index: 0;
+  }
+
+  #modal::before{
+    position: absolute;
+    content: "";
+    color: #fff;
+    font-size: 18px;
+    font-family: fantasy;
+    top: -5%;
+    left: -25%;
+    height: 130%;
+    width: 70%;
+    background: rgba(219, 113, 89, 1);
+    background-image: -moz-linear-gradient(left top, #FCA104 0%, #FC6135 100%);
+    background-image: -webkit-gradient(linear,left top, right bottom,color-stop(0, #FCA104),color-stop(1, #FC6135));
+    background: -webkit-linear-gradient(left top, #FCA104 0%, #FC6135 100%);
+    background: -o-linear-gradient(left top, #FCA104 0%, #FC6135 100%);
+    background: -ms-linear-gradient(left top, #FCA104 0%, #FC6135 100%);
+    background: linear-gradient(left top, #FCA104 0%, #FC6135 100%);
+    opacity: 0.8;
+    -ms-transform: rotate(-20deg); /* IE 9 */
+    -webkit-transform: rotate(-20deg); /* Safari */
+    transform: rotate(-20deg);
+    z-index: 0;
+  }
+
+  j-modal j-button, j-modal j-button:hover{
+    background: rgba(219, 113, 89, 1);
+    background-image: -moz-linear-gradient(left top,#FBBA00 0%, #FF750C 100%);
+    background-image: -webkit-gradient(linear,left top, right bottom,color-stop(0, #FBBA00),color-stop(1, #FF750C));
+    background: -webkit-linear-gradient(left top, #FBBA00 0%, #FF750C 100%);
+    background: -o-linear-gradient(left top, #FBBA00 0%, #FF750C 100%);
+    background: -ms-linear-gradient(left top, #FBBA00 0%, #FF750C 100%);
+    background: linear-gradient(left top, #FBBA00 0%, #FF750C 100%);
+    border: 0px solid #FBBC00;
+    color: #fff;
+    font-size: 18px;
+    padding: 10px;
+    padding-left: 50px;
+    padding-right: 50px;
+    position: absolute;
+    right: 50%;
+    transform: translateX(50%);
+    bottom: 20px;
+  }
+</style-->
+<j-hslider>
+  <j-toolbar type="tab">
+    <j-button for=".tab1">Tab 1</j-button><j-button for=".tab2">Tab2</j-button>
+  </j-toolbar>
+</j-hslider>
+<div>
+  <div class="tab1">Tab 1 content</div>
+  <div class="tab2">Tab 2 content</div>
+</div>
+<j-colorPicker></j-colorPicker>
+<j-button id="asd">Button 1</j-button>
+<j-button id="button1" color="blue" icon="fa-file">Button Blue</j-button>
+<j-button color="red" icon="fa-cog">Button Red</j-button>
+
+<j-textField icon="fa-calendar">Text</j-textField>
+<j-textField icon="fa-calendar">Text</j-textField><br/>
+<j-textField icon="fa-calendar">Text</j-textField><br/>
+<j-textField>Text</j-textField><br/>
+<j-datefield>Datefield</j-datefield><br/>
+<j-combofield>Combofield
+	<j-table>
+
+		<j-loader src="http://gggmpscdweb05/gg_beta/index.php/emres_sppb/get_data"></j-loader>
+		[["ID", "SPPB No.", "SPPB Date", "Requestor", "PIC"]]
+
+		<j-pagination>
+		</j-pagination>
+	</j-table>
+</j-combofield><br/>
+
+<j-combofield>Combofield
+	<j-table>
+		[
+		  [ "ID", "Fruit", "data 1", "data 2", "data 3"],
+      [ 1, "apple", 4, 10, 2 ],
+      [ 2, "banana", 0, 4, 0 ],
+      [ 3, "grape", 2, 3, 5 ],
+      [ 4, "pear", 4, 2, 8 ],
+      [ 5, "strawberry", 0, 14, 0 ]
+    ]
+	</j-table>
+</j-combofield><br/>
+
+<j-passwordfield>Password</j-passwordfield><br/>
+
+<j-numberField>Number</j-numberField>
+<j-checkbox>Checkbox</j-checkbox>
+
+<j-dataview>
+    [
+        [ "apple", 4, 10, 2 ],
+        [ "banana", 0, 4, 0 ],
+        [ "grape", 2, 3, 5 ],
+        [ "pear", 4, 2, 8 ],
+        [ "strawberry", 0, 14, 0 ]
+    ]
+</j-dataview>
+Dataview custom example
+<j-dataview id="dataview">
+    [
+        [ "apple", 4, 10000, 2 ],
+        [ "banana", 0, 40000, 0 ],
+        [ "grape", 2, 30000, 5 ],
+        [ "pear", 4, 20000, 8 ],
+        [ "strawberry", 0, 14000, 0 ]
+    ]
+</j-dataview>
+<style>
+  #dataview table{
+    background: rgba(123, 85, 166, 0.4)
+  }
+</style>
+<script>
+$('#dataview').on('afterdraw', function(){
+  $(this).find('tr').each(function(i, val){
+    var td = $(val).children(), view = '<td><div style="display: inline-block; width: 200px; background-color: #fff; margin: 5px; color: #A49791; padding: 3px;"><span style="color: #413053">'+td.eq(0).text()+'</span><br>Jumlah: '+td.eq(1).text()+' @'+td.eq(2).text()+'</div></td>'
+    $(val).html(view);
+  })
+})
+</script>
+
+<j-table>
+    [
+        [ "apple", 4, 10, 2 ],
+        [ "banana", 0, 4, 0 ],
+        [ "grape", 2, 3, 5 ],
+        [ "pear", 4, 2, 8 ],
+        [ "strawberry", 0, 14, 0 ]
+    ]
+    <j-custom target="0">
+      function(record){
+        return 'asd';
+      }
+    </j-custom>
+</j-table>
+
+<j-table width="300px" title="Tooltip Table" onafterdraw="cls" id="afterdraw">
+	<j-custom width="100px" target="0">
+		function(record){
+			return 'Custom ' + record[0];
+		}
+	</j-custom>
+	<j-drop target="1" onclick="drop"></j-drop>
+	<j-drop target="0" onclick="drop2"></j-drop>
+    [
+		[ "ID", "Fruit", "data 1", "data 2", "data 3"],
+        [ 1, "apple", 4, 10, 2 ],
+        [ 2, "banana", 0, 4, 0 ],
+        [ 3, "grape", 2, 3, 5 ],
+        [ 4, "pear", 4, 2, 8 ],
+        [ 5, "strawberry", 0, 14, 0 ]
+    ]
+</j-table>
+
+<j-table title="Table" id="table3">
+	<j-custom width="100px" target="0">
+		function(record){
+			return 'Custom ' + record[0];
+		}
+	</j-custom>
+	<j-loader src="http://gggmpscdweb05/gg_beta/index.php/emres_sppb/get_data"></j-loader>
+	[["ID", "SPPB No.", "SPPB Date", "Requestor", "PIC", "Type SPPB", "Description" ,"Delivery Date", "Destination"]]
+
+	<j-pagination>
+	</j-pagination>
+</j-table>
+<script>
+function data(param, callback, always){
+  aaData = [];
+  var i = 0;
+  while(i<param.iDisplayLength){
+    var data = [];
+    data.push(jui2.random(8, 'aA#'))
+    data.push(jui2.random(8, 'aA#'))
+    aaData.push(data)
+    i++;
+  }
+  callback({sEcho: param.sEcho, iTotalRecords: 700, iTotalDisplayRecords: param.iDisplayLength||10, aaData: aaData})
+  always();
+}
+</script>
+
+<j-table title="Table from Function">
+	<j-loader fn="data"></j-loader>
+	[["Data 1", "Data 2"]]
+
+	<j-pagination>
+	</j-pagination>
+</j-table>
+
+<j-toolbar toolbarscroll="true">
+  <j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button>
+  <j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button>
+  <j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button>
+  <j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button>
+  <j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button>
+  <j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button>
+  <j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button>
+  <j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button>
+  <j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button>
+  <j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button>
+  <j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button>
+  <j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button><j-button>Button</j-button>
+</j-toolbar>
+<script>
+	function cls(){
+		console.log('aaaaa');
+	}
+
+	$('#asd').click(function(){
+		alert('Button Click');
+	})
+
+	function drop(tr, record){
+		$(tr).children().append(record[1]);
+	}
+
+	function drop2(tr, record){
+		$(tr).children().append('Drop visible 1');
+	}
+
+  $('#afterdraw').on('afterdraw', function(){
+    console.log('afterdraw')
+  })
+  function cancel(td){
+    console.log('cancel')
+  }
+  function submit(td){
+    console.log('submit')
+    td.remove()
+  }
+</script>
+<j-datefield target="#table3" clicktarget="td" cancel="cancel" submit="submit">Date</j-datefield>
+
+<j-tree>
+    [
+        [ "apple", 0, 10, 2 ],
+        [ "banana", 1, 4, 0 ],
+        [ "grape", 2, 3, 5 ],
+        [ "pear", 0, 2, 8 ],
+        [ "strawberry", 4, 14, 0 ]
+    ]
+</j-tree>
+
+<j-toolbar><j-button icon="fa-search-plus">Zoom in</j-button><j-button icon="fa-search-minus">Zoom out</j-button></j-toolbar>
+<j-gantt>
+  <j-loader src="http://gggmpscdweb02/test/?user=Anonymous&identifier=proj-267y2015&authenticity_token=KSvjzHN2zOzSmPSsq4fktVI6eCBVNnxIa%2FzIVp%2BPfAY%3D&project_id=proj-267y2015&fields%5B%5D=status_id&operators%5Bstatus_id%5D=o&values%5Bstatus_id%5D%5B%5D=1&operators%5Btracker_id%5D=%3D&values%5Btracker_id%5D%5B%5D=1&operators%5Bpriority_id%5D=%3D&values%5Bpriority_id%5D%5B%5D=3&operators%5Bassigned_to_id%5D=%3D&values%5Bassigned_to_id%5D%5B%5D=50&operators%5Bauthor_id%5D=%3D&values%5Bauthor_id%5D%5B%5D=50&operators%5Bsubject%5D=~&values%5Bsubject%5D%5B%5D=&operators%5Bcreated_on%5D=%3Et-&values%5Bcreated_on%5D%5B%5D=&operators%5Bupdated_on%5D=%3Et-&values%5Bupdated_on%5D%5B%5D=&operators%5Bstart_date%5D=%3Ct%2B&values%5Bstart_date%5D%5B%5D=&operators%5Bdue_date%5D=%3Ct%2B&values%5Bdue_date%5D%5B%5D=&operators%5Bestimated_hours%5D=%3D&values%5Bestimated_hours%5D%5B%5D=&operators%5Bdone_ratio%5D=%3D&values%5Bdone_ratio%5D%5B%5D=&operators%5Bcf_23%5D=%3D&values%5Bcf_23%5D%5B%5D=Gempol&operators%5Bcf_7%5D=%3D&values%5Bcf_7%5D%5B%5D=&operators%5Bcf_16%5D=%3Ct%2B&values%5Bcf_16%5D%5B%5D=&operators%5Bcf_17%5D=%3Ct%2B&values%5Bcf_17%5D%5B%5D=&operators%5Bcf_8%5D=%3D&values%5Bcf_8%5D%5B%5D=&operators%5Bcf_15%5D=%3Ct%2B&values%5Bcf_15%5D%5B%5D=&operators%5Bcf_18%5D=~&values%5Bcf_18%5D%5B%5D=&operators%5Bcf_4%5D=%3D&values%5Bcf_4%5D%5B%5D=&operators%5Bcf_20%5D=~&values%5Bcf_20%5D%5B%5D=&operators%5Bcf_19%5D=~&values%5Bcf_19%5D%5B%5D=&operators%5Bcf_3%5D=%3D&values%5Bcf_3%5D%5B%5D=&operators%5Bcf_12%5D=~&values%5Bcf_12%5D%5B%5D=&operators%5Bcf_21%5D=%3D&values%5Bcf_21%5D%5B%5D=&operators%5Bcf_10%5D=%3D&values%5Bcf_10%5D%5B%5D=&operators%5Bcf_22%5D=%3D&values%5Bcf_22%5D%5B%5D=&group_by=&callback=?"></j-loader>
+    []
+</j-gantt>
+<script>
+  $('j-button:contains(Zoom in)').click(function(){
+    $('j-gantt')[0].zoomIn()
+  })
+  $('j-button:contains(Zoom out)').click(function(){
+    $('j-gantt')[0].zoomOut()
+  })
+  $('j-gantt')[0].tooltip = function(data){
+    var info = data.realData[3]
+    return '<a href="http://'+window.location.host+'/redmine/issues/'+data.realData[0]+'">'+info.tracker + ' #'+data.realData[0]+'</a> '+info.name+'<br/><br/><b>Status</b>: '+info.status+'<br/><b>Start</b>: '+info.startDate+'<br/><b>Due date</b>: '+info.endDate+'<br/><b>Assigned to</b>: '+info.assigned+'<br/><b>Priority</b>: '+info.priority
+  }
+</script>
+<j-tooltip target="#afterdraw td" tooltip="Loading"></j-tooltip>
+<script>
+  $('j-tooltip')[0].tooltip = function(el){
+    var self = this
+    self.setText('Loading...')
+    setTimeout(function(){
+      self.setText('Coba tooltip')
+    }, 1000)
+  }
+</script>
+<j-modal class="j-right-menu">
+  <ul>
+    <li>
+      <div><i class="fa fa-cog"></i></div><div>Setting</div>
+    </li>
+    <li>
+      <div><i class="fa fa-save"></i></div><div>Save</div>
+    </li>
+    <li class="j-menu-spacer">
+      <div></div><div></div>
+    </li>
+    <li>
+      <div><i class="fa fa-close"></i></div><div>Close</div>
+    </li>
+  </ul>
+</j-modal>
+<style>
+.j-right-menu > ul > li{
+  position: relative;
+}
+.j-right-menu > ul > li:not(.j-menu-spacer){
+  height: 20px;
+}
+.j-right-menu > ul{
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  cursor: default;
+}
+.j-right-menu > ul > li:not(.j-menu-spacer):hover:after{
+  border: 1px solid #1B9CDC;
+  content: "";
+  opacity: 0.5;
+  z-index: -1;
+  position: absolute;
+  top: 0px;
+  left: -3px;
+  width: 100%;
+  height: 100%;
+  padding: 0 3px;
+}
+.j-right-menu > ul > li > div{
+  display: inline-block;
+}
+.j-right-menu > ul > li:not(.j-menu-spacer) > div{
+  height: 20px;
+}
+.j-right-menu > ul > li > div:first-child > i{
+  padding-top: 2px;
+}
+.j-right-menu > ul > li > div:first-child{
+  width: 16px;
+  padding-right: 3px;
+  font-size: 16px;
+}
+.j-right-menu > ul > li > div:last-child{
+  width: 150px;
+  border-left: 1px solid #d9d9d9;
+  padding-left: 5px;
+}
+.j-menu-spacer{
+  line-height: 0px;
+}
+.j-menu-spacer > div:last-child{
+  height:0px !important;
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+  position: relative;
+}
+.j-menu-spacer > div:last-child:after{
+  position: absolute;
+  content: "";
+  top: 2px;
+  left: 0px;
+  height: 0px;
+  width: 100%;
+  border-bottom: 1px dashed #d9d9d9 !important;
+}
+</style>
+</body>
+</html>

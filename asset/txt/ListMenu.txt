@@ -1,0 +1,2 @@
+--format penulisan [alamat file gambar]<>[nama aplikasi]<>[keterangan]<>[alamat url]<>[modul]
+asset/images/image/form_icon_25603.png<>KRS<>(empty)<>load("menu/menu_krs","#headerBot");load("krs/index","#content")<>#80cce7;

@@ -1,0 +1,657 @@
+<Style>
+#tinymceexcelworkbook{
+	-webkit-touch-callout: none; /* iOS Safari */
+	-webkit-user-select: none;   /* Chrome/Safari/Opera */
+	-khtml-user-select: none;    /* Konqueror */
+	-moz-user-select: none;      /* Firefox */
+	-ms-user-select: none;       /* IE/Edge */
+	user-select: none;           /* non-prefixed version, currently
+																	not supported by any browser */
+}
+
+#tinymceexcelworkbook td{
+	border: 1px dotted #7F7F7F;
+}
+
+#selection{
+  background: rgba(10, 10, 10, 0.3) none repeat scroll 0 0;
+  border: 1px solid #3399ff;
+  height: 0;
+  width: 0;
+  position: absolute;
+}
+</Style>
+<script src="jquery.js"></script>
+<script src="shim.js"></script>
+<script src="jszip.js"></script>
+<script src="xlsx.min.js"></script>
+<!--script src="plugin.js"></script-->
+<input id="tinymceexcel" type="file" />
+<div id="sheet">
+
+</div>
+<div id="tinymceexcelworkbook">
+
+</div>
+<script>
+template = []
+template[0] = ['#FFFFFF', '#F2F2F2', '#D8D8D8', '#BFBFBF', '#A5A5A5', '#7F7F7F']
+template[1] = ['#000000', '#7F7F7F', '#595959', '#3F3F3F', '#262626', '#0C0C0C']
+template[2] = ['#EEECE1', '#DDD9C3', '#C4BD97', '#938953', '#494429', '#1D1B10']
+template[3] = ['#1F497D', '#C6D9F0', '#8DB3E2', '#548DD4', '#17365D', '#0F243E']
+template[4] = ['#4F81BD', '#DBE5F1', '#B8CCE4', '#95B3D7', '#366092', '#244061']
+template[5] = ['#C0504D', '#F2DCDB', '#E5B9B7', '#D99694', '#953734', '#632423']
+template[6] = ['#9BBB59', '#EBF1DD', '#D7E3BC', '#C3D69B', '#76923C', '#4F6128']
+template[7] = ['#8064A2', '#E5E0EC', '#CCC1D9', '#B2A2C7', '#5F497A', '#3F3151']
+template[8] = ['#4BACC6', '#DBEEF3', '#B7DDE8', '#92CDDC', '#31859B', '#205867']
+template[9] = ['#F79646', '#FDEADA', '#FBD5B5', '#FAC08F', '#E36C09', '#974806']
+
+function handleFile(e) {
+  var files = e.target.files;
+  var i,f;
+  for (i = 0, f = files[i]; i != files.length; ++i) {
+    var reader = new FileReader();
+    var name = f.name;
+    reader.onload = function(e) {
+      var data = e.target.result;
+
+      var workbook = XLSX.read(data, {type: 'binary', cellStyles: true});
+      $('#sheet').empty()
+      for(i in workbook.SheetNames){
+        $('#sheet').append('<div style="display:inline-block; border: 1px solid #C5C5C5; margin: 2px;padding: 2px;cursor: pointer;" class="sheet">'+workbook.SheetNames[i]+'</div>')
+      }
+      $('#sheet .sheet').click(function(e){
+        var sheet = $(this).text()
+        showTable(workbook, sheet)
+      })
+      /* DO SOMETHING WITH workbook HERE */
+
+      showTable(workbook, workbook.SheetNames[0])
+
+    };
+    reader.readAsBinaryString(f);
+  }
+}
+
+function showTable(workbook, sheet){
+  parent.console.log(workbook)
+  var worksheet = workbook.Sheets[sheet];
+  var table = '<table style="border-collapse: collapse">', row = 1
+
+	var rc = worksheet['!ref'].split(':');
+
+	var charToInt = function(val) {
+	  var base = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', i, j, result = 0;
+
+	  for (i = 0, j = val.length - 1; i < val.length; i += 1, j -= 1) {
+	    result += Math.pow(base.length, j) * (base.indexOf(val[i]) + 1);
+	  }
+
+	  return result;
+	};
+  var tr = ''
+	for(i=0;i<parseInt(rc[1].replace(/\D+/g,''));i++){
+    tr += '<tr>'
+    for(z=0;z<charToInt(rc[1].replace(/\d+/g,''));z++){
+      tr += '<td class="row'+(i+1)+'"></td>'
+    }
+    tr += '</tr>'
+  }
+
+  table += tr + '</table>';
+  table = $(table)
+
+  table.find('td').css('height', '18px').css('height', '18px')
+  var totalWidth = 0;
+  for(i in worksheet['!cols']){
+    table.find('tr > td:nth-child('+(parseInt(i)+1)+')').width(worksheet['!cols'][i].wpx)
+    totalWidth+=parseInt(worksheet['!cols'][i].wpx)
+  }
+
+  //table.width(totalWidth)
+
+  for (z in worksheet) {
+    /* all keys that do not begin with "!" correspond to cell addresses */
+    //parent.console.log(z);
+    if(z[0] === '!') continue;
+    style = worksheet[z].s;
+    var bgcolor = "", color = "", fontsize = "", fontfamily = "", borderbottom = "", borderright = "", borderleft = "", bordertop = "", textalign = '', verticalalign = ''
+    if(style){
+      if(style.alignment)
+        if(style.alignment.horizontal)
+          textalign = style.alignment.horizontal
+        else
+          verticalalign = style.alignment.vertical
+      if(style.border){
+        if(style.border.bottom)
+          switch(style.border.bottom.style){
+            case "thin" : borderbottom = '1px solid'; break;
+            case "medium" : borderbottom = '2px solid'; break;
+            case "thick" : borderbottom = '3px solid'; break;
+            case "double" : borderbottom = '3px double'; break;
+            case "dotted" : borderbottom = '1px dotted'; break;
+            case "dashed" : borderbottom = '1px dashed'; break;
+            case "hair" : borderbottom = '1px dotted'; break;
+            case "mediumDouble" : borderbottom = '5px double'; break;
+            case "mediumDotted" : borderbottom = '2px dotted'; break;
+            case "mediumDashed" : borderbottom = '2px dashed'; break;
+            case "mediumHair" : borderbottom = '2px dotted'; break;
+            case "thickDouble" : borderbottom = '8px double'; break;
+            case "thickDotted" : borderbottom = '3px dotted'; break;
+            case "thickDashed" : borderbottom = '3px dashed'; break;
+            case "thickHair" : borderbottom = '3px dotted'; break;
+          }
+        if(style.border.top)
+          switch(style.border.top.style){
+            case "thin" : bordertop = '1px solid'; break;
+            case "medium" : bordertop = '2px solid'; break;
+            case "thick" : bordertop = '3px solid'; break;
+            case "double" : bordertop = '3px double'; break;
+            case "dotted" : bordertop = '1px dotted'; break;
+            case "dashed" : bordertop = '1px dashed'; break;
+            case "hair" : bordertop = '1px dotted'; break;
+            case "mediumDouble" : bordertop = '5px double'; break;
+            case "mediumDotted" : bordertop = '2px dotted'; break;
+            case "mediumDashed" : bordertop = '2px dashed'; break;
+            case "mediumHair" : bordertop = '2px dotted'; break;
+            case "thickDouble" : bordertop = '8px double'; break;
+            case "thickDotted" : bordertop = '3px dotted'; break;
+            case "thickDashed" : bordertop = '3px dashed'; break;
+            case "thickHair" : bordertop = '3px dotted'; break;
+          }
+        if(style.border.right)
+          switch(style.border.right.style){
+            case "thin" : borderright = '1px solid'; break;
+            case "medium" : borderright = '2px solid'; break;
+            case "thick" : borderright = '3px solid'; break;
+            case "double" : borderright = '3px double'; break;
+            case "dotted" : borderright = '1px dotted'; break;
+            case "dashed" : borderright = '1px dashed'; break;
+            case "hair" : borderright = '1px dotted'; break;
+            case "mediumDouble" : borderright = '5px double'; break;
+            case "mediumDotted" : borderright = '2px dotted'; break;
+            case "mediumDashed" : borderright = '2px dashed'; break;
+            case "mediumHair" : borderright = '2px dotted'; break;
+            case "thickDouble" : borderright = '8px double'; break;
+            case "thickDotted" : borderright = '3px dotted'; break;
+            case "thickDashed" : borderright = '3px dashed'; break;
+            case "thickHair" : borderright = '3px dotted'; break;
+          }
+        if(style.border.left)
+          switch(style.border.left.style){
+            case "thin" : borderleft = '1px solid'; break;
+            case "medium" : borderleft = '2px solid'; break;
+            case "thick" : borderleft = '3px solid'; break;
+            case "double" : borderleft = '3px double'; break;
+            case "dotted" : borderleft = '1px dotted'; break;
+            case "dashed" : borderleft = '1px dashed'; break;
+            case "hair" : borderleft = '1px dotted'; break;
+            case "mediumDouble" : borderleft = '5px double'; break;
+            case "mediumDotted" : borderleft = '2px dotted'; break;
+            case "mediumDashed" : borderleft = '2px dashed'; break;
+            case "mediumHair" : borderleft = '2px dotted'; break;
+            case "thickDouble" : borderleft = '8px double'; break;
+            case "thickDotted" : borderleft = '3px dotted'; break;
+            case "thickDashed" : borderleft = '3px dashed'; break;
+            case "thickHair" : borderleft = '3px dotted'; break;
+          }
+
+        /*color*/
+        if(style.border.bottom)
+          if(style.border.bottom.color){
+            if(style.border.bottom.color.theme){
+              if(style.border.bottom.color.theme==1){
+                switch(Math.round(style.border.bottom.color.tint*100)){
+                  case 50: borderbottom = template[style.border.bottom.color.theme][1];break;
+                  case 35: borderbottom = template[style.border.bottom.color.theme][2];break;
+                  case 25: borderbottom = template[style.border.bottom.color.theme][3];break;
+                  case 15: borderbottom = template[style.border.bottom.color.theme][4];break;
+                  case 5: borderbottom = template[style.border.bottom.color.theme][5];break;
+                }
+              }
+              else if(style.border.bottom.color.theme==2){
+                switch(Math.round(style.border.bottom.color.tint*100)){
+                  case -10: borderbottom = template[style.border.bottom.color.theme][1];break;
+                  case -25: borderbottom = template[style.border.bottom.color.theme][2];break;
+                  case -50: borderbottom = template[style.border.bottom.color.theme][3];break;
+                  case -75: borderbottom = template[style.border.bottom.color.theme][4];break;
+                  case -90: borderbottom = template[style.border.bottom.color.theme][5];break;
+                }
+              }
+              else if(style.border.bottom.color.theme>=3){
+                switch(Math.round(style.border.bottom.color.tint*100)){
+                  case 80: borderbottom = template[style.border.bottom.color.theme][1];break;
+                  case 60: borderbottom = template[style.border.bottom.color.theme][2];break;
+                  case 40: borderbottom = template[style.border.bottom.color.theme][3];break;
+                  case -25: borderbottom = template[style.border.bottom.color.theme][4];break;
+                  case -50: borderbottom = template[style.border.bottom.color.theme][5];break;
+                }
+              }
+              else if(style.border.bottom.color.theme==0){
+                switch(Math.round(style.border.bottom.color.tint*100)){
+                  case 5: borderbottom = template[style.border.bottom.color.theme][1];break;
+                  case 15: borderbottom = template[style.border.bottom.color.theme][2];break;
+                  case 25: borderbottom = template[style.border.bottom.color.theme][3];break;
+                  case 35: borderbottom = template[style.border.bottom.color.theme][4];break;
+                  case 50: borderbottom = template[style.border.bottom.color.theme][5];break;
+                }
+              }
+            }
+            else{
+              if(style.border.bottom.color.rgb){
+                if(style.border.bottom.color.rgb.length == 8)
+                  borderbottom += ' #'+style.border.bottom.color.rgb.substring(2,8)
+                else
+                  borderbottom += ' #'+style.border.bottom.color.rgb;
+              }
+              else {
+                borderbottom += ' black'
+              }
+            }
+          }
+
+          if(style.border.top)
+            if(style.border.top.color){
+              if(style.border.top.color.theme){
+                if(style.border.top.color.theme==1){
+                  switch(Math.round(style.border.top.color.tint*100)){
+                    case 50: bordertop = template[style.border.top.color.theme][1];break;
+                    case 35: bordertop = template[style.border.top.color.theme][2];break;
+                    case 25: bordertop = template[style.border.top.color.theme][3];break;
+                    case 15: bordertop = template[style.border.top.color.theme][4];break;
+                    case 5: bordertop = template[style.border.top.color.theme][5];break;
+                  }
+                }
+                else if(style.border.top.color.theme==2){
+                  switch(Math.round(style.border.top.color.tint*100)){
+                    case -10: bordertop = template[style.border.top.color.theme][1];break;
+                    case -25: bordertop = template[style.border.top.color.theme][2];break;
+                    case -50: bordertop = template[style.border.top.color.theme][3];break;
+                    case -75: bordertop = template[style.border.top.color.theme][4];break;
+                    case -90: bordertop = template[style.border.top.color.theme][5];break;
+                  }
+                }
+                else if(style.border.top.color.theme>=3){
+                  switch(Math.round(style.border.top.color.tint*100)){
+                    case 80: bordertop = template[style.border.top.color.theme][1];break;
+                    case 60: bordertop = template[style.border.top.color.theme][2];break;
+                    case 40: bordertop = template[style.border.top.color.theme][3];break;
+                    case -25: bordertop = template[style.border.top.color.theme][4];break;
+                    case -50: bordertop = template[style.border.top.color.theme][5];break;
+                  }
+                }
+                else if(style.border.top.color.theme==0){
+                  switch(Math.round(style.border.top.color.tint*100)){
+                    case 5: bordertop = template[style.border.top.color.theme][1];break;
+                    case 15: bordertop = template[style.border.top.color.theme][2];break;
+                    case 25: bordertop = template[style.border.top.color.theme][3];break;
+                    case 35: bordertop = template[style.border.top.color.theme][4];break;
+                    case 50: bordertop = template[style.border.top.color.theme][5];break;
+                  }
+                }
+              }
+              else{
+                if(style.border.top.color.rgb){
+                  if(style.border.top.color.rgb.length == 8)
+                    bordertop += ' #'+style.border.top.color.rgb.substring(2,8)
+                  else
+                    bordertop += ' #'+style.border.top.color.rgb;
+                }
+                else {
+                  bordertop += ' black'
+                }
+              }
+            }
+
+            if(style.border.left)
+              if(style.border.left.color){
+                if(style.border.left.color.theme){
+                  if(style.border.left.color.theme==1){
+                    switch(Math.round(style.border.left.color.tint*100)){
+                      case 50: borderleft = template[style.border.left.color.theme][1];break;
+                      case 35: borderleft = template[style.border.left.color.theme][2];break;
+                      case 25: borderleft = template[style.border.left.color.theme][3];break;
+                      case 15: borderleft = template[style.border.left.color.theme][4];break;
+                      case 5: borderleft = template[style.border.left.color.theme][5];break;
+                    }
+                  }
+                  else if(style.border.left.color.theme==2){
+                    switch(Math.round(style.border.left.color.tint*100)){
+                      case -10: borderleft = template[style.border.left.color.theme][1];break;
+                      case -25: borderleft = template[style.border.left.color.theme][2];break;
+                      case -50: borderleft = template[style.border.left.color.theme][3];break;
+                      case -75: borderleft = template[style.border.left.color.theme][4];break;
+                      case -90: borderleft = template[style.border.left.color.theme][5];break;
+                    }
+                  }
+                  else if(style.border.left.color.theme>=3){
+                    switch(Math.round(style.border.left.color.tint*100)){
+                      case 80: borderleft = template[style.border.left.color.theme][1];break;
+                      case 60: borderleft = template[style.border.left.color.theme][2];break;
+                      case 40: borderleft = template[style.border.left.color.theme][3];break;
+                      case -25: borderleft = template[style.border.left.color.theme][4];break;
+                      case -50: borderleft = template[style.border.left.color.theme][5];break;
+                    }
+                  }
+                  else if(style.border.left.color.theme==0){
+                    switch(Math.round(style.border.left.color.tint*100)){
+                      case 5: borderleft = template[style.border.left.color.theme][1];break;
+                      case 15: borderleft = template[style.border.left.color.theme][2];break;
+                      case 25: borderleft = template[style.border.left.color.theme][3];break;
+                      case 35: borderleft = template[style.border.left.color.theme][4];break;
+                      case 50: borderleft = template[style.border.left.color.theme][5];break;
+                    }
+                  }
+                }
+                else{
+                  if(style.border.left.color.rgb){
+                    if(style.border.left.color.rgb.length == 8)
+                      borderleft += ' #'+style.border.left.color.rgb.substring(2,8)
+                    else
+                      borderleft += ' #'+style.border.left.color.rgb;
+                  }
+                  else {
+                    borderleft += ' black'
+                  }
+                }
+              }
+
+              if(style.border.right)
+                if(style.border.right.color){
+                  if(style.border.right.color.theme){
+                    if(style.border.right.color.theme==1){
+                      switch(Math.round(style.border.right.color.tint*100)){
+                        case 50: borderright = template[style.border.right.color.theme][1];break;
+                        case 35: borderright = template[style.border.right.color.theme][2];break;
+                        case 25: borderright = template[style.border.right.color.theme][3];break;
+                        case 15: borderright = template[style.border.right.color.theme][4];break;
+                        case 5: borderright = template[style.border.right.color.theme][5];break;
+                      }
+                    }
+                    else if(style.border.right.color.theme==2){
+                      switch(Math.round(style.border.right.color.tint*100)){
+                        case -10: borderright = template[style.border.right.color.theme][1];break;
+                        case -25: borderright = template[style.border.right.color.theme][2];break;
+                        case -50: borderright = template[style.border.right.color.theme][3];break;
+                        case -75: borderright = template[style.border.right.color.theme][4];break;
+                        case -90: borderright = template[style.border.right.color.theme][5];break;
+                      }
+                    }
+                    else if(style.border.right.color.theme>=3){
+                      switch(Math.round(style.border.right.color.tint*100)){
+                        case 80: borderright = template[style.border.right.color.theme][1];break;
+                        case 60: borderright = template[style.border.right.color.theme][2];break;
+                        case 40: borderright = template[style.border.right.color.theme][3];break;
+                        case -25: borderright = template[style.border.right.color.theme][4];break;
+                        case -50: borderright = template[style.border.right.color.theme][5];break;
+                      }
+                    }
+                    else if(style.border.right.color.theme==0){
+                      switch(Math.round(style.border.right.color.tint*100)){
+                        case 5: borderright = template[style.border.right.color.theme][1];break;
+                        case 15: borderright = template[style.border.right.color.theme][2];break;
+                        case 25: borderright = template[style.border.right.color.theme][3];break;
+                        case 35: borderright = template[style.border.right.color.theme][4];break;
+                        case 50: borderright = template[style.border.right.color.theme][5];break;
+                      }
+                    }
+                  }
+                  else{
+                    if(style.border.right.color.rgb){
+                      if(style.border.right.color.rgb.length == 8)
+                        borderright += ' #'+style.border.right.color.rgb.substring(2,8)
+                      else
+                        borderright += ' #'+style.border.right.color.rgb;
+                    }
+                    else {
+                      borderright += ' black'
+                    }
+                  }
+                }
+      }
+
+      if(style.fgColor){
+        bgcolor = style.fgColor ? '#'+style.fgColor.rgb : '';
+      }
+      else if(style.fill){
+        bgcolor = style.fill.fgColor ? '#'+style.fill.fgColor.rgb : '';
+        if(style.fill.fgColor.theme){
+          bgcolor = template[style.fill.fgColor.theme][0]
+          if(style.fill.fgColor.theme==1){
+            switch(Math.round(style.fill.fgColor.tint*100)){
+              case 50: bgcolor = template[style.fill.fgColor.theme][1];break;
+              case 35: bgcolor = template[style.fill.fgColor.theme][2];break;
+              case 25: bgcolor = template[style.fill.fgColor.theme][3];break;
+              case 15: bgcolor = template[style.fill.fgColor.theme][4];break;
+              case 5: bgcolor = template[style.fill.fgColor.theme][5];break;
+            }
+          }
+          else if(style.fill.fgColor.theme==2){
+            switch(Math.round(style.fill.fgColor.tint*100)){
+              case -10: bgcolor = template[style.fill.fgColor.theme][1];break;
+              case -25: bgcolor = template[style.fill.fgColor.theme][2];break;
+              case -50: bgcolor = template[style.fill.fgColor.theme][3];break;
+              case -75: bgcolor = template[style.fill.fgColor.theme][4];break;
+              case -90: bgcolor = template[style.fill.fgColor.theme][5];break;
+            }
+          }
+          else if(style.fill.fgColor.theme>=3){
+            switch(Math.round(style.fill.fgColor.tint*100)){
+              case 80: bgcolor = template[style.fill.fgColor.theme][1];break;
+              case 60: bgcolor = template[style.fill.fgColor.theme][2];break;
+              case 40: bgcolor = template[style.fill.fgColor.theme][3];break;
+              case -25: bgcolor = template[style.fill.fgColor.theme][4];break;
+              case -50: bgcolor = template[style.fill.fgColor.theme][5];break;
+            }
+          }
+          else if(style.fill.fgColor.theme==0){
+            switch(Math.round(style.fill.fgColor.tint*100)){
+              case 5: bgcolor = template[style.fill.fgColor.theme][1];break;
+              case 15: bgcolor = template[style.fill.fgColor.theme][2];break;
+              case 25: bgcolor = template[style.fill.fgColor.theme][3];break;
+              case 35: bgcolor = template[style.fill.fgColor.theme][4];break;
+              case 50: bgcolor = template[style.fill.fgColor.theme][5];break;
+            }
+          }
+        }
+      }
+      if(style.font){
+        color = style.font.color ? '#'+style.font.color.rgb : '';
+        if(style.font.color.theme){
+          color = template[style.font.color.theme][0]
+          if(style.font.color.theme==1){
+            switch(Math.round(style.font.color.tint*100)){
+              case 50: color = template[style.font.color.theme][1];break;
+              case 35: color = template[style.font.color.theme][2];break;
+              case 25: color = template[style.font.color.theme][3];break;
+              case 15: color = template[style.font.color.theme][4];break;
+              case 5: color = template[style.font.color.theme][5];break;
+            }
+          }
+          else if(style.font.color.theme==2){
+            switch(Math.round(style.font.color.tint*100)){
+              case -10: color = template[style.font.color.theme][1];break;
+              case -25: color = template[style.font.color.theme][2];break;
+              case -50: color = template[style.font.color.theme][3];break;
+              case -75: color = template[style.font.color.theme][4];break;
+              case -90: color = template[style.font.color.theme][5];break;
+            }
+          }
+          else if(style.font.color.theme>=3){
+            switch(Math.round(style.font.color.tint*100)){
+              case 80: color = template[style.font.color.theme][1];break;
+              case 60: color = template[style.font.color.theme][2];break;
+              case 40: color = template[style.font.color.theme][3];break;
+              case -25: color = template[style.font.color.theme][4];break;
+              case -50: color = template[style.font.color.theme][5];break;
+            }
+          }
+          else if(style.font.color.theme==0){
+            switch(Math.round(style.font.color.tint*100)){
+              case 5: color = template[style.font.color.theme][1];break;
+              case 15: color = template[style.font.color.theme][2];break;
+              case 25: color = template[style.font.color.theme][3];break;
+              case 35: color = template[style.font.color.theme][4];break;
+              case 50: color = template[style.font.color.theme][5];break;
+            }
+          }
+        }
+        fontsize = style.font.sz ? style.font.sz : '';
+        fontfamily = style.font.name ? style.font.name : '';
+      }
+
+      if(bgcolor.length == 9)
+        bgcolor = '#'+bgcolor.substring(3,9)
+      if(color.length == 9)
+        color = '#'+color.substring(3,9)
+    }
+    /*if(parseInt(row) != parseInt(z.replace(/\D+/g, ''))){
+      row = z.replace(/\D+/g, '');
+      table += '</tr>'
+    }*/
+
+    table.find('tr:nth-child('+parseInt(z.replace(/\D+/g, ''))+') > td:nth-child('+charToInt(z.replace(/\d+/g, ''))+')').attr("style",
+      "background-color: "+bgcolor+";\
+      color: "+color+";\
+      font-size: "+fontsize+";\
+      font-family: "+fontfamily+";\
+      border-bottom: "+borderbottom+";\
+      border-top: "+bordertop+";\
+      border-left: "+borderleft+";\
+      border-right: "+borderright+";\
+      text-align: "+textalign+";\
+      vertical-align: "+verticalalign+";\
+    ").text(worksheet[z].v)
+
+    //table += '<td class="row'+row+'" style="background-color:'+bgcolor+';color:'+color+';font-size:'+fontsize+';font-family:'+fontfamily+';border-bottom:'+borderbottom+';border-top:'+bordertop+';border-left:'+borderleft+';border-right:'+borderright+';">'+worksheet[z].v+'</td>';
+  }
+  //table += '</tr></table>'
+  $('#tinymceexcelworkbook').empty().append(table);
+  for( i in worksheet['!merges']){
+    //console.log(worksheet['!merges'][i])
+    var colspan = worksheet['!merges'][i].e.c - worksheet['!merges'][i].s.c + 1,
+    rowspan = worksheet['!merges'][i].e.r - worksheet['!merges'][i].s.r + 1;
+    //console.log('#tinymceexcelworkbook tr:nth-child('+(worksheet['!merges'][i].s.r+1)+') > td:nth-child('+(worksheet['!merges'][i].s.c+1)+')', $('#tinymceexcelworkbook tr:nth-child('+(worksheet['!merges'][i].s.r+1)+') > td:nth-child('+(worksheet['!merges'][i].s.c+1)+')'))
+    for(var z=rowspan-1; z>=0; z--){
+      for(var k=colspan-1; k>=0; k--){
+        //console.log($('#tinymceexcelworkbook tr:nth-child('+(worksheet['!merges'][i].s.r+z+1)+') > td:nth-child('+(worksheet['!merges'][i].s.c+k+1)+')'), '#tinymceexcelworkbook tr:nth-child('+(worksheet['!merges'][i].s.r+z+1)+') > td:nth-child('+(worksheet['!merges'][i].s.c+k+1)+')')
+        if( !$('#tinymceexcelworkbook tr:nth-child('+(worksheet['!merges'][i].s.r+z+1)+') > td:nth-child('+(worksheet['!merges'][i].s.c+k+1)+')').is($('#tinymceexcelworkbook tr:nth-child('+(worksheet['!merges'][i].s.r+1)+') > td:nth-child('+(worksheet['!merges'][i].s.c+1)+')')) ){
+          $('#tinymceexcelworkbook tr:nth-child('+(worksheet['!merges'][i].s.r+z+1)+') > td:nth-child('+(worksheet['!merges'][i].s.c+k+1)+')').remove()
+        }
+      }
+    }
+    $('#tinymceexcelworkbook tr:nth-child('+(worksheet['!merges'][i].s.r+1)+') > td:nth-child('+(worksheet['!merges'][i].s.c+1)+')').attr('colspan', colspan).attr('rowspan', rowspan)
+  }
+}
+document.getElementById('tinymceexcel').addEventListener('change', handleFile, false);
+var click = false, clicke = {};
+$('#tinymceexcelworkbook').on('mousedown', function(e){
+  $('div#selection').remove()
+  click = true;
+  $('body').append('<div id="selection"></div>')
+  clicke = e
+
+  var offset = $('#tinymceexcelworkbook').offset()
+
+  $('#selection').css({
+    left: e.pageX,
+    top: e.pageY
+  })
+})
+
+$.fn.outerHTML = function(s) {
+  return s
+    ? this.before(s).remove()
+    : jQuery("<p>").append(this.eq(0).clone()).html();
+};
+
+$.fn.isOverlap = function(selector){
+  var rect1, rect2 = selector instanceof jQuery ? selector[0].getBoundingClientRect() : (selector instanceof HTMLCollection ? selector.getBoundingClientRect() : $(selector)[0].getBoundingClientRect())
+  if(!this.is(':visible')){
+    this.css('opacity', 0).show();
+    rect1 = this[0].getBoundingClientRect()
+    this.hide().css('opacity', '');
+  }
+  else
+    rect1 = this[0].getBoundingClientRect()
+  return !(rect1.right < rect2.left ||
+    rect1.left > rect2.right ||
+    rect1.bottom < rect2.top ||
+    rect1.top > rect2.bottom)
+};
+
+$.fn.touching = function(selector){
+  var el = this;
+  return $(selector || '*:visible').filter(function(){
+    return el.isOverlap(this)
+  })
+}
+
+$('body').on('mouseup', function(){
+  if(click){
+    click = false;
+    var selected = $('#selection').touching('td')
+    $('#selection').css({
+      height: (selected.last().offset().top + selected.last().innerHeight() - 3) - selected.eq(0).offset().top,
+      width: (selected.last().offset().left + selected.last().innerWidth() - 3) - selected.eq(0).offset().left
+    })
+    $('#selection').css({
+        top: selected.eq(0).offset().top+1,
+        left: selected.eq(0).offset().left+1
+    })
+
+    var allSelected = $('#selection').touching('td');
+
+    var tr = allSelected.eq(0).attr('class'),
+    html = '<table style="border-collapse: collapse"><tr>'
+    allSelected.each(function(i, val){
+      if(tr!=$(val).attr('class')){
+        tr = $(val).attr('class');
+        html += '</tr><tr>'
+      }
+      html += $(val).outerHTML();
+    })
+    /*for(i in allSelected){
+      if(tr!=$(allSelected[i]).attr('class')){
+        tr = $(allSelected[i]).attr('class');
+        html += '</tr><tr>'
+      }
+      html += $(allSelected[i]).outerHTML();
+    }*/
+    html += '</tr></table>'
+    top.tinymce.activeEditor.windowManager.setParams({'table': html})
+  }
+}).on('mousemove', function(e){
+  if(click){
+    if(e.clientY>= document.body.clientHeight-10){
+      $(document).scrollTop($(document).scrollTop()+25)
+    }
+    if(e.clientX>= document.body.clientWidth-10){
+      $(document).scrollLeft($(document).scrollLeft()+25)
+    }
+    if(e.clientY<= 10){
+      $(document).scrollTop($(document).scrollTop()-25)
+    }
+    if(e.clientX>= document.body.clientWidth-10){
+      $(document).scrollLeft($(document).scrollLeft()+25)
+    }
+    $('#selection').css({
+      height: e.pageY - clicke.pageY,
+      width: e.pageX - clicke.pageX
+    })
+  }
+})
+
+/*var selection = window.getSelection();
+var range = selection.getRangeAt(0);
+var allWithinRangeParent = range.commonAncestorContainer.getElementsByTagName("*");
+
+var allSelected = [];
+for (var i=0, el; el = allWithinRangeParent[i]; i++) {
+  // The second parameter says to include the element
+  // even if it's not fully selected
+  if (selection.containsNode(el, true) && el.tagName == 'TD' ) {
+    allSelected.push(el);
+  }
+}*/
+</script>

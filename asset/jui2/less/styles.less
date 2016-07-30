@@ -1,0 +1,776 @@
+@import "elements.less";
+/* defaults */
+.j-border{
+	border: 1px solid #126DAF;
+}
+
+.j-body{
+	color: #000000;
+	font-family: helvetica,arial,verdana,sans-serif;
+	font-size: 13px;
+}
+
+.j-body, j-body *{
+	margin: 0px;
+	padding: 0px;
+	line-height: 18px;
+	font-family: helvetica,arial,verdana,sans-serif;
+	font-size: 13px;
+}
+
+.j-disabled{
+	#transform > .opacity();
+	cursor: default;
+}
+
+.j-disabled *{
+	cursor: default;
+}
+
+/* start custom class*/
+.j-textCenter{
+	text-align: center;
+}
+.j-bg-inherit{
+	background: inherit !important;
+}
+.j-bg-inherit:hover{
+	background: inherit !important;
+}
+.j-bg-inherit:active{
+	background: inherit !important;
+}
+.j-border-inherit{
+	border-color: transparent !important;
+}
+.j-border-inherit:hover{
+	border-color: transparent !important;
+}
+.j-border-inherit:active{
+	border-color: transparent !important;
+}
+.j-background-transparent{
+	/* IE 8 */
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=75)";
+
+	/* IE 5-7 */
+	filter: alpha(opacity=75);
+
+	/* Netscape */
+	-moz-opacity: 0.75;
+
+	/* Safari 1.x */
+	-khtml-opacity: 0.75;
+
+	/* Good browsers */
+	opacity: 0.75;
+}
+/* end custom class*/
+
+/* start button */
+.j-button{
+	#gradient > .linear();
+	#border > .box();
+	#border > .rounded(3px);
+	cursor: pointer;
+	display: inline-block;
+	outline: 0 none;
+	position: relative;
+	text-decoration: none;
+	vertical-align: top;
+/*	white-space: nowrap;*/
+	padding: 3px 5px;
+	height: auto;
+}
+
+.j-button a i:not(.j-splitButton-sub):not(.j-right-icon){
+	line-height: 18px;
+}
+
+.j-bar .j-button{
+	padding: 0px 5px;
+	vertical-align: middle;
+	height: 22px;
+	margin: 0px 2px;
+	line-height: 20px;
+	/*border-right: 1px solid transparent;*/
+}
+
+.j-button:hover{
+	#gradient > .linear(#3691d2, #2c85c6, #307cb4, #2c85c6);
+	border-color: #2c85c6;
+}
+
+.j-bar .j-button:hover{
+	#gradient > .linear(#3691d2, #2c85c6, #307cb4, #2c85c6);
+}
+
+.j-button:active{
+	#gradient > .linear(#2b83c4, #2777b1, #2a6ea0, #2777b1);
+	border-color: #2c85c6;
+}
+
+.j-bar .j-button:active{
+	#gradient > .linear(#2b83c4, #2777b1, #2a6ea0, #2777b1);
+	border-color: #2c85c6;
+}
+
+.j-button span{
+	display: block;
+	color: #FFFFFF;
+    font-size: 13px;
+}
+
+.j-bar .j-button i{
+	vertical-align: top;
+	margin-top: 1px;
+}
+
+.j-button i{
+	vertical-align: top;
+}
+
+.j-button span span{
+	display: inline-block;
+}
+
+.j-button span span{
+    font-weight: bold;
+}
+
+.j-color-toolbar .j-text{
+	color: #666666;
+}
+
+.j-color-toolbar .j-button{
+	#gradient > .linear(#F6F6F6, #F5F5F5, #E8E8E8, #F5F5F5);
+	border-color: #E1E1E1;
+}
+
+.j-color-toolbar .j-button:hover{
+	#gradient > .linear(#EDEDED, #EBEBEB, #DFDFDF, #EBEBEB);
+	border-color: #E1E1E1;
+}
+
+.j-color-toolbar .j-button:active{
+	#gradient > .linear(#E1e1e1, #e4e4e4, #d5d5d5, #e4e4e4);
+	border-color: #E1E1E1;
+}
+
+.j-color-toolbar .j-button span{
+	color: #666666;
+}
+
+.j-color-toolbar-white{
+	background: #fff !important;
+}
+
+.j-color-toolbar-white .j-button{
+	#gradient > .linear(#F6F6F6, #F5F5F5, #E8E8E8, #F5F5F5);
+	border-color: #E1E1E1;
+}
+
+.j-color-toolbar-white .j-button:hover{
+	#gradient > .linear(#EDEDED, #EBEBEB, #DFDFDF, #EBEBEB);
+	border-color: #E1E1E1;
+}
+
+.j-color-toolbar-white .j-button:active{
+	#gradient > .linear(#E1e1e1, #e4e4e4, #d5d5d5, #e4e4e4);
+	border-color: #E1E1E1;
+}
+
+.j-color-toolbar-white .j-button span{
+	color: #666666;
+}
+/* end button */
+
+/* start menu items */
+.j-modal-menu{
+	display: inline-block;
+	background: #fff;
+	#shadow > .drop(0px, 0px, 2px, 0.5); 
+	min-width: 120px;
+}
+
+.j-menu-item{
+	display: block;
+	cursor: pointer;
+	outline: 0 none;
+	position: relative;
+	text-decoration: none;
+	padding: 3px 5px;
+	padding-right: 16px;
+	white-space: nowrap;
+}
+
+.j-menu-item i:nth-child(1){
+	width: 16px;
+	padding-right: 8px;
+}
+
+.j-menu-item:hover{
+	background: #DEE9F4;
+}
+/* end menu items */
+
+/* start split button */
+.j-bar .j-splitButton-sub{
+	margin-top: 1px;
+}
+.j-splitButton-sub{
+	float: right;
+	width: 18px;
+	height: 18px;
+	text-align: center;
+	border-left: 1px solid #afafaf;
+	margin-left: 5px;
+	line-height: auto !important;
+}
+/* end split button */
+
+/* start text */
+.j-text{
+	display: inline-block;
+	color: inherit;
+}
+.j-bar .j-text{
+	height: 22px;
+	display: table-cell;
+	vertical-align: middle;
+	border-right: 5px solid transparent;
+	color: #ffffff;
+	font-weight: bold;
+}
+/* end text */
+
+/* start bar */
+.j-spacer{
+	flex: 1 1 0;
+}
+.j-bar{
+	padding: 5px;
+	display: block;
+	height: 22px;
+	display: flex;
+}
+.j-bar > *:last-child{
+	border-right: 0px;
+}
+.j-color-bar{
+	background: #157FCC;
+}
+.j-color-toolbar{
+	background: #F5F5F5;
+}
+/* end bar */
+
+/* start calendar */
+.j-calendar{
+	background: #fff;
+	border-collapse: separate;
+	#shadow > .drop(0px, 0px, 2px, 0.5); 
+}
+.j-calendar thead tr:nth-child(2) td{
+	font-weight: bold;
+}
+.j-calendar tbody td{
+	text-align: right;
+	background: #fff;
+	padding: 2px;
+	border: 1px solid #fff;
+	cursor: pointer;
+}
+.j-calendar tbody td:hover{
+	background: #F5F5F5;
+	border: 1px solid #DFEAF2;
+}
+.j-calendar .j-bar, .j-calendar-overlay .j-bar{
+	background: #F5F5F5;
+}
+.j-calendar .j-bar *{
+	color: #666666;
+}
+.j-calendar-overlay{
+	display: flex;
+	flex-direction: column;
+}
+.j-calendar-monthPicker, .j-calendar-yearPicker{
+	height: 100%;
+	width: 50%;
+	flex: 1;
+}
+.j-calendar-selected{
+	background: #EAF3FA !important;
+	border: 1px solid #3892D3 !important;
+}
+.j-calendar-bottom-toolbar *{
+	color: #fff !important;
+}
+.j-calendar-top-toolbar i{
+	line-height: 20px;
+}
+/* end calendar */
+
+/* start overlay */
+.j-overlay{
+	position:absolute;
+	background: #ffffff;
+}
+/* end overlay */
+
+/* start monthPicker */
+.j-monthPicker{
+	background: #ffffff;
+	border-collapse: separate;
+	flex: 1;
+}
+
+.j-monthPicker td{
+	text-align: center;
+	width: 50%;
+	padding: 2px;
+	border: 1px solid #fff;
+	cursor: pointer;
+}
+
+.j-monthPicker td:hover{
+	background: #F5F5F5;
+	border: 1px solid #DFEAF2;
+}
+.j-monthPicker-selected{
+	background: #EAF3FA;
+	border: 1px solid #3892D3 !important;
+}
+/* end monthPicker */
+
+/* start yearPicker */
+.j-yearPicker{
+	background: #ffffff;
+	border-collapse: separate;
+	flex: 1;
+}
+
+.j-yearPicker .j-bar{
+	padding: 3px;
+	height: 28px;
+}
+
+.j-yearPicker td{
+	text-align: center;
+	width: 50%;
+	padding: 2px;
+	border: 1px solid #fff;
+	cursor: pointer;
+}
+
+.j-yearPicker tbody td:hover{
+	background: #F5F5F5;
+	border: 1px solid #DFEAF2;
+}
+
+.j-yearPicker .j-bar *{
+	color: #666666;
+}
+.j-yearPicker-top-toolbar{
+	border: 0 solid !important;
+	padding: 0px !important;
+	height: 28px !important;
+}
+.j-yearPicker-selected{
+	background: #EAF3FA;
+	border: 1px solid #3892D3 !important;
+}
+.j-yearPicker-top-toolbar .j-button{
+	margin-top: 6px;
+}
+/* end yearPicker */
+
+/* start datePicker */
+.j-datePicker{
+	display: inline-block;
+	position: relative;
+	margin: 2px;
+}
+.j-datePicker div{
+	display: inline-block;
+	border: 1px solid #D9D9D9;
+	background: #fff;
+}
+.j-datePicker label{
+	display: inline-block;
+	width: 125px;
+}
+.j-datePicker input{
+	padding: 3px;
+	width: 150px;
+	/*padding-right: 20px;*/
+	border: 0px;
+}
+.j-datePicker div:focus{
+	padding: 3px;
+	/*padding-right: 20px;*/
+	border: 1px solid #3892D3;
+}
+.j-datePicker i{
+	color: #666666;
+	cursor: pointer;
+	margin-right: 5px;
+}
+/* end datePicker */
+
+/* start textField */
+.j-textField{
+	display: inline-block;
+	position: relative;
+	margin: 2px;
+}
+.j-textField div{
+	display: inline-block;
+	border: 1px solid #D9D9D9;
+	background: #fff;
+}
+.j-bar .j-textField{
+	margin: 0px;
+}
+.j-textField label{
+	display: inline-block;
+	width: 125px;
+}
+.j-textField input{
+	padding: 3px;
+	width: 150px;
+	/*padding-right: 20px;*/
+	border: 0px;
+}
+.j-textField div:focus{
+	padding: 3px;
+	/*padding-right: 20px;*/
+	border: 1px solid #3892D3;
+}
+.j-textField i{
+	/*position: absolute;
+	right: 5px;
+	top: 5px;*/
+	color: #666666;
+	cursor: pointer;
+	margin-right: 5px;
+}
+/* end textField */
+
+/* start listItems */
+.j-listItems{
+	#shadow > .drop(0px, 0px, 2px, 0.5); 
+}
+.j-listItems .j-bar{
+	background: #F5F5F5;
+}
+.j-listItems .j-bar .j-text{
+	color: #000 !important;
+}
+.j-listItems .j-listItems-container{
+	max-height: 200px;
+	min-width: 150px;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+.j-listItems ul{
+	padding: 0px;
+	margin: 0px;
+	background: #ffffff;
+}
+.j-listItems ul li{
+	cursor: pointer;
+	display: flex;
+	list-style: none outside none;
+	margin: 0;
+	overflow: hidden;
+	padding: 2px 10px;
+	position: relative;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	padding-right: 30px;
+}
+.j-listItems ul li:hover{
+	background: #D6e8f6;
+}
+/* end listItems */
+
+/* start table */
+.j-table{
+	border: 1px solid #D9D9D9;
+	display: flex;
+	flex-direction: column;
+}
+
+.j-table .j-table-head{
+	background: #F5F5F5;
+}
+
+.j-table .j-table-head table{
+	border-collapse: collapse;
+	table-layout: fixed;
+	width: auto;
+	min-width: 100%;
+}
+.j-table .j-table-head thead td{
+	padding: 7px 10px;
+	font-weight: bold;
+	border: 1px solid silver;
+	border: 1px solid silver;
+	font-size: 13px;
+}
+.j-table .j-table-head thead td > div{
+	/*overflow: hidden;
+    white-space: nowrap;*/
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+.j-table .j-table-head tbody td{
+	height: 0px;
+	padding: 0px;
+	position: relative;
+	white-space: nowrap;
+}
+
+.j-table-body{
+	flex: 1 1 0;
+	overflow: auto;
+}
+.j-table-head{
+	overflow: hidden;
+}
+
+.j-table .j-table-body > table{
+	table-layout: fixed;
+	overflow: hidden;
+	white-space: nowrap;
+}
+.j-table .j-table-body .j-table-field > div{
+	padding: 5px 10px 4px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap; /* Add this line */
+	-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+	-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+	box-sizing: border-box;
+	width: 100%;
+}
+.j-table .j-table-body > table{
+	border-collapse: collapse;
+	width: auto;
+}
+.j-table .j-table-body > table tr:hover td{
+	background: #D6e8f6;
+}
+.j-table .j-table-body > table tr:first-child .j-table-field{
+	border-top: 0px;
+}
+.j-table .j-table-body > table .j-table-field{
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	word-wrap: break-word;
+	white-space: nowrap; /* Add this line */
+	border: 1px solid silver;
+	background: #fff;
+}
+.j-table-drop{
+	cursor: pointer;
+}
+.j-table-header-menu{
+	background: none repeat scroll 0 0 #F5F5F5;
+	border-left: 1px solid #C0C0C0;
+	height: 30px;
+	position: absolute;
+	right: -10px;
+	text-align: center;
+	top: -7px;
+	width: 18px;
+	display: none;
+	cursor: pointer;
+}
+.j-table-header-menu:hover{
+	background: #d6e8f6;
+}
+.j-table-header-menu i{
+	padding-top: 7px;
+	padding-left: 5px;
+}
+.j-table-header-resize{
+	width: 5px;
+	cursor: col-resize;
+	float: right;
+	height: 100%;
+}
+.j-table-ruler{
+	height: 100%;
+	display: none;
+	width: 0px;
+	border: 1px solid black;
+	position:absolute;
+	z-index:9999;
+}
+/* end table */
+
+/* start loadingMask */
+.j-loadingMask{
+	border: 5px solid #157FCC;
+	display: inline-block;
+	padding: 3px;
+}
+.j-loadingMask span{
+	padding-left: 20px;
+}
+.j-loadingMask i{
+    position: absolute;
+    -webkit-animation:spin 2s linear infinite;
+    -moz-animation:spin 2s linear infinite;
+    animation:spin 2s linear infinite;
+	width: 13px;
+	height: 13px;
+	top: 50%;
+}
+@-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
+@-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
+@keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
+/* End loadingMask */
+
+/* start modal */
+.j-modal-overlay{
+	height: 100% !important;
+	width: 100% !important;
+	position: fixed;
+}
+.j-modal{
+	min-width: 200px;
+	min-height: 200px;
+}
+/* end modal */
+
+/* start panel */
+.j-panel{
+	border: 1px solid #D9D9D9;
+}
+/* start panel */
+
+/* start textArea */
+.j-textArea{
+	display: inline-block;
+	position: relative;
+	margin: 2px;
+}
+.j-textArea div{
+	display: inline-block;
+	border: 1px solid #D9D9D9;
+	background: #fff;
+}
+.j-textArea label{
+	display: inline-block;
+	width: 125px;
+	vertical-align: top;
+}
+.j-textArea input{
+	padding: 3px;
+	width: 150px;
+	/*padding-right: 20px;*/
+	border: 0px;
+}
+.j-textArea div:focus{
+	padding: 3px;
+	/*padding-right: 20px;*/
+	border: 1px solid #3892D3;
+}
+.j-textArea i{
+	/*position: absolute;
+	right: 5px;
+	top: 5px;*/
+	color: #666666;
+	cursor: pointer;
+	margin-right: 5px;
+}
+.j-textArea-editor{
+	border: none !important;
+}
+/* end textArea */
+
+/* start radioField */
+.j-radioField{
+	display: inline-block;
+	position: relative;
+	margin: 2px;
+}
+.j-radioField div{
+	display: inline-block;
+	background: #fff;
+}
+.j-radioField > label{
+	display: inline-block;
+	width: 125px;
+	vertical-align: top;
+}
+.j-radioField input{
+	padding: 3px;
+	/*padding-right: 20px;*/
+	border: 0px;
+}
+.j-radioField div:focus{
+	padding: 3px;
+	/*padding-right: 20px;*/
+	border: 1px solid #3892D3;
+}
+.j-radioField i{
+	/*position: absolute;
+	right: 5px;
+	top: 5px;*/
+	color: #666666;
+	cursor: pointer;
+	margin-right: 5px;
+}
+/* end textArea */
+
+/* start medium */
+.Medium{
+    position: relative;
+    }
+.Medium,
+.Medium *{
+    min-height: 1px;
+    outline: none;
+    resize: none;
+    zoom: 1;
+    -moz-box-sizing: border-box;
+	box-sizing: border-box;
+    }
+    
+.Medium p{
+	position: relative;
+	z-index: 2;
+}
+.Medium p:first-child,
+.Medium .Medium-placeholder + p{
+	margin-top:0;
+}
+.Medium p:last-child{
+	margin-bottom:0;
+}
+.Medium .Medium-paste-hook{
+	position: absolute;
+	opacity:0;
+}
+.Medium .Medium-placeholder{
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+	filter: alpha(opacity=50);
+	opacity: 0.5;
+	position: absolute;
+	z-index: 1;
+	pointer-events: none;
+}
+.Medium.Medium-rich .Medium-placeholder{
+	font-style: italic;
+}
+/* end medium */

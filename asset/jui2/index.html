@@ -1,0 +1,563 @@
+<script src="js/jquery.js"></script>
+<script src="js/moment.js"></script>
+<script src="js/handlebars-v1.3.0.js"></script>
+<script src="js/taffy-min.js"></script>
+<script src="js/swag.min.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/tether.min.js"></script>
+<script src="js/constraint.js"></script>
+<script src="js/spectra.min.js"></script>
+<script src="js/jquery.flexverticalcenter.js"></script>
+<script src="js/pouchdb-nightly.min.js"></script>
+<script src="js/jquery.scrollmagic.min.js"></script>
+<script src="js/bean.min.js"></script>
+<script src="js/drag.min.js"></script>
+<script src="js/midway.min.js"></script>
+<script>Swag.registerHelpers(Handlebars);</script>
+
+<link rel="stylesheet/less" type="text/css" href="less/styles.less" />
+<script src="js/less-1.6.3.min.js"></script>
+<link rel="stylesheet" href="css/font-awesome.min.css">
+
+<script id="tmpl_button" class="tmpl" type="text/x-handlebars-template">
+	<div id="{{id}}" class="j-button j-body j-border {{class}}" role="button" unselectable="on"><a><span><span>{{#if icon}}<i class="fa {{icon}}"></i>{{/if}}<span>{{{label}}}</span></span></span></a></div>
+</script>
+
+<script id="tmpl_menuButton" class="tmpl" type="text/x-handlebars-template">
+	<div id="{{id}}" class="j-button j-body j-border" role="menuButton"><a><span><span><i class="fa {{icon}}" style="vertical-align: baseline !important;"></i> <span>{{{label}}}</span> <i class="fa fa-sort-down j-right-icon"></i></span></span></a></div>
+</script>
+
+<script id="tmpl_splitButton" class="tmpl" type="text/x-handlebars-template">
+	<div id="{{id}}" class="j-button j-body j-border" role="splitButton"><a><span><span><i class="fa {{icon}}" style="vertical-align: baseline !important;"></i> <span>{{{label}}}</span> <i class="fa fa-sort-down j-splitButton-sub"></i></span></span></a></div>
+</script>
+
+<script id="tmpl_menu" class="tmpl" type="text/x-handlebars-template">
+	<div id="{{id}}" class="j-modal-menu j-body {{#if child}}j-menu-{{parentId}}{{/if}}" role="menu">
+		{{#each menu}}
+			{{#if this.menu}}
+			<a class="j-menu-item" unselectable="on" items='{{jui2MenuFnChildMenu this.menu}}'><span><i class="fa {{this.icon}}"></i><span>{{{this.label}}}</span><i class="fa fa-caret-right" style="padding-top:3px; padding-right: 8px; position: absolute; right: 0px;"></i></span></a>
+			{{else}}
+			<a class="j-menu-item" unselectable="on" items='undefined'><span><i class="fa {{this.icon}}"></i><span>{{{this.label}}}</span></span></a>
+			{{/if}}
+		{{/each}}
+	</div>
+</script>
+
+<script id="tmpl_calendar" class="tmpl" type="text/x-handlebars-template">
+	<table id="{{id}}" class="j-body j-calendar" role="calendar">
+		<thead>
+			<tr>
+				<td colspan="7" class="j-calendar-top-toolbar"></td>
+			</tr>
+			<tr>
+				<td>{{dateName.sun.short}}</td>
+				<td>{{dateName.mon.short}}</td>
+				<td>{{dateName.tue.short}}</td>
+				<td>{{dateName.wed.short}}</td>
+				<td>{{dateName.thu.short}}</td>
+				<td>{{dateName.fri.short}}</td>
+				<td>{{dateName.sat.short}}</td>
+			</tr>
+		</thead>
+		<tbody>
+		{{{datesOfMonth}}}
+		</tbody>
+		<tfoot>
+			<tr>
+				<td colspan="7" class="j-calendar-bottom-toolbar"></td>
+			</tr>
+		</tfoot>
+	</table>
+</script>
+
+<script id="tmpl_monthPicker" class="tmpl" type="text/x-handlebars-template">
+	<table id="{{id}}" class="j-body j-monthPicker {{class}}" role="monthPicker">
+		<tr><td>{{monthsName.jan.short}}</td><td>{{monthsName.jul.short}}</td></tr>
+		<tr><td>{{monthsName.feb.short}}</td><td>{{monthsName.aug.short}}</td></tr>
+		<tr><td>{{monthsName.mar.short}}</td><td>{{monthsName.sep.short}}</td></tr>
+		<tr><td>{{monthsName.apr.short}}</td><td>{{monthsName.oct.short}}</td></tr>
+		<tr><td>{{monthsName.may.short}}</td><td>{{monthsName.nov.short}}</td></tr>
+		<tr><td>{{monthsName.jun.short}}</td><td>{{monthsName.dec.short}}</td></tr>
+	</table>
+</script>
+
+<script id="tmpl_yearPicker" class="tmpl" type="text/x-handlebars-template">
+	<table id="{{id}}" class="j-body j-yearPicker {{class}}" role="yearPicker">
+		<thead>
+			<tr><td colspan="2" class="j-yearPicker-top-toolbar"></td></tr>
+		</thead>
+		<tbody>
+			<tr><td>{{math year "-" 4}}</td><td>{{math year "+" 1}}</td></tr>
+			<tr><td>{{math year "-" 3}}</td><td>{{math year "+" 2}}</td></tr>
+			<tr><td>{{math year "-" 2}}</td><td>{{math year "+" 3}}</td></tr>
+			<tr><td>{{math year "-" 1}}</td><td>{{math year "+" 4}}</td></tr>
+			<tr><td class="j-yearPicker-selected">{{year}}</td><td>{{math year "+" 5}}</td></tr>
+		</tbody>
+	</table>
+</script>
+
+<script id="tmpl_calendarDate" class="tmpl" type="text/x-handlebars-template">
+	{{#each weeks}}
+	<tr>
+		{{#each this}}
+		<td value="{{this.value}}">{{this.text}}</td>
+		{{/each}}
+	</tr>
+	{{/each}}
+</script>
+
+<script id="tmpl_bar" class="tmpl" type="text/x-handlebars-template">
+	<div id="{{id}}" class="j-body j-bar j-color-{{type}} {{class}}" role="bar"></div>
+</script>
+
+<script id="tmpl_text" class="tmpl" type="text/x-handlebars-template">
+	<div id="{{id}}" class="j-body j-text {{class}}">{{label}}</div>
+</script>
+
+<script id="tmpl_overlay" class="tmpl" type="text/x-handlebars-template">
+	<div id="{{id}}" style="top:{{top}};left:{{left}};height :{{height}};width:{{width}};z-index:{{z}}" class="j-body j-overlay {{class}}" role="overlay">{{{content}}}</div>
+</script>
+
+<script id="tmpl_spacer" class="tmpl" type="text/x-handlebars-template">
+	<div id="{{id}}" class="j-body j-spacer"></div>
+</script>
+
+<script id="tmpl_datePicker" class="tmpl" type="text/x-handlebars-template">
+	<div id="{{id}}" class="j-body j-datePicker" role="datePicker">{{#if label}}<label for="{{id}}">{{label}}</label>: {{/if}}<div><input id="{{id}}"></input><i class="fa fa-calendar" style="vertical-align: baseline !important;"></i></div></div>
+</script>
+
+<script id="tmpl_textField" class="tmpl" type="text/x-handlebars-template">
+	<div id="{{id}}" class="j-body j-textField {{class}}" role="textField">{{#if label}}<label for="{{id}}">{{label}}</label>: {{/if}}<div><input id="{{id}}"></input>{{#if icon}}<i class="fa {{icon}}" style="vertical-align: baseline !important;"></i>{{/if}}</div></div>
+</script>
+
+<script id="tmpl_comboField" class="tmpl" type="text/x-handlebars-template">
+	<div id="{{id}}" class="j-body j-textField j-comboField" role="comboField">{{#if label}}<label for="{{id}}">{{label}}</label>: {{/if}}<div><input id="{{id}}"></input><input class="j-value" type="hidden"></input>{{#if icon}}<i class="fa {{icon}}" style="vertical-align: baseline !important;"></i>{{/if}}</div></div>
+</script>
+
+<script id="tmpl_listItems" class="tmpl" type="text/x-handlebars-template">
+	<div class="j-body j-listItems" role="listItems">
+		<div class="j-listItems-top-toolbar">
+		</div>
+		<div class="j-listItems-container">
+			<ul>
+				{{#each items}}
+				<li value="{{{this.value}}}">{{{this.label}}}</li>
+				{{/each}}
+			</ul>
+		</div>
+		<div class="j-listItems-bottom-toolbar">
+		</div>
+	</div>
+</script>
+
+<script id="tmpl_passwordField" class="tmpl" type="text/x-handlebars-template">
+	<div id="{{id}}" class="j-body j-textField" role="passwordField">{{#if label}}<label for="{{id}}">{{label}}</label>: {{/if}}<div><input id="{{id}}" type="password"></input>{{#if icon}}<i class="fa {{icon}}" style="vertical-align: baseline !important;"></i>{{/if}}</div></div>
+</script>
+
+<script id="tmpl_table" class="tmpl" type="text/x-handlebars-template">
+	<div id="{{id}}" class="j-body j-table" role="table" style="width:{{width}};height:{{height}}">
+		<div class="j-table-ruler"></div>
+		<div class="j-table-top-toolbar"></div>
+		<div class="j-table-head">
+			<table>
+				<thead>
+					{{#each columns}}
+					<tr>
+						{{#each this}}
+						<td colspan="{{this.colspan}}" rowspan="{{this.rowspan}}" width="{{this.width}}" onmouseover="$(this).find('.j-table-header-menu').show()" onmouseout="$(this).find('.j-table-header-menu').hide()">
+							<div style="position: relative;width: {{this.width}}">{{{this.text}}}
+								<div class="j-table-header-menu"><i class="fa fa-sort-down"></i><div class="j-table-header-resize"></div></div>
+							</div>
+						</td>
+						{{/each}}
+						<td colspan="1" width="auto"></td>
+					</tr>
+					{{/each}}
+				</thead>
+				<tbody>
+					<tr>
+						{{#for 0 colCount 1}}
+							<td></td>
+						{{/for}}
+							<td class="j-table-last-td"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="j-table-body">
+		</div>
+		<div class="j-table-bottom-toolbar"></div>
+	</div>
+</script>
+
+<script id="tmpl_tableData" class="tmpl" type="text/x-handlebars-template">
+	<table class="j-body {{class}}" cellpadding="0" cellspacing="0">
+		{{#for 0 colCount 1}}
+			<colgroup><col></col></colgroup>
+		{{/for}}
+			<colgroup><col></col></colgroup>
+		<tbody>
+			{{#each data}}
+			<tr>
+				{{#each this}}
+					{{#compare @index ../../colCount operator="<"}}
+						{{#checkarray ../../../drop @index}}
+				<td class="j-table-field j-table-drop" onclick="jui2.table({id:'{{../../../../id}}'}).showDrop('{{this}}', this)"><div><i class="fa fa-plus-square-o"></i></div></td>
+						{{else}}
+				<td class="j-table-field"><div>{{{this}}}</div></td>
+						{{/checkarray}}
+					{{/compare}}
+				{{/each}}
+				<td class="j-table-field"><div>&nbsp;</div></td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+</script>
+
+<script id="tmpl_loadingMask" class="tmpl" type="text/x-handlebars-template">
+	<div class="j-loadingMask"><i class="fa fa-refresh"></i><span>Loading...</span></div>
+</script>
+
+<script id="tmpl_modal" class="tmpl" type="text/x-handlebars-template">
+	<div class="j-modal midway-horizontal midway-vertical" width="{{width}}" height="{{height}}">
+		<div class="j-modal-top-toolbar"></div>
+		<div class="j-modal-content"></div>
+	</div>
+</script>
+
+<script src="js/core.js"></script>
+<script src="js/lang.monthPicker.js"></script>
+<script src="js/oms.js"></script>
+<script src="js/overlay.js"></script>
+<script src="js/button.js"></script>
+<script src="js/menuButton.js"></script>
+<script src="js/splitButton.js"></script>
+<script src="js/text.js"></script>
+<script src="js/spacer.js"></script>
+<script src="js/menu.js"></script>
+<script src="js/bar.js"></script>
+<script src="js/monthPicker.js"></script>
+<script src="js/yearPicker.js"></script>
+<script src="js/calendar.js"></script>
+<script src="js/textField.js"></script>
+<script src="js/passwordField.js"></script>
+<script src="js/datePicker.js"></script>
+<script src="js/comboField.js"></script>
+<script src="js/table.js"></script>
+<script src="js/modal.js"></script>
+<script src="js/loadingMask.js"></script>
+<script src="js/create.js"></script>
+
+<script>
+	jui2.tmpl = {};
+	
+	$('.tmpl').each(function(i, val){
+		var el = $(this)
+		jui2.tmpl[el.attr('id')] = Handlebars.compile(el.html())
+	})
+	$(document).ready(function(){	
+		
+		//jui2.table({title: 'Table 1', colCount: 2, columns: [[{text: 'Stock', colspan: 2, width: 200}],[{text: 'Company'}, {text: 'Price'}]], data: [['GG', '9999'],['GG', '9999'],['GG', '9999'],['GG', '9999'],['GG', '9999'],['GG', '9999'],['GG', '9999'],['GG', '9999'],['GG', '9999'],['GG', '9999']]});
+		
+		jui2.table({title: 'Table 1', drop: [0], hidden:[1], colCount: 8, columns: [[{text: 'Stock', colspan: 7, width: 1500},{text: 'Test', rowspan: 2, width: 200},{text: 'Stock', width: 100}],[{text: 'Company'}, {text: 'Price'}, {text: 'Price'}, {text: 'Price'}, {text: 'Price'}, {text: 'Price'}, {text: 'Price'}, {text: 'Price'}]], data: 'json/table.json', server: true});
+		
+		jui2.text({label:'asd'});
+		
+		jui2.comboField({
+			label: 'Combo Box',
+			items:'json/combo.json'
+		})
+		
+		jui2.comboField({
+			label: 'Combo Box',
+			items:[{
+				label: 'test',
+				value: 1
+			},{
+				label: 'test',
+				value: 2
+			},{
+				label: 'test',
+				value: 3
+			},{
+				label: 'test',
+				value: 4
+			},{
+				label: 'test',
+				value: 5
+			},{
+				label: 'test',
+				value: 6
+			},{
+				label: 'test',
+				value: 7
+			},{
+				label: 'test',
+				value: 8
+			},{
+				label: 'test',
+				value: 9
+			},{
+				label: 'test',
+				value: 10
+			},{
+				label: 'test',
+				value: 11
+			},{
+				label: 'test',
+				value: 12
+			},{
+				label: 'test',
+				value: 13
+			},{
+				label: 'test',
+				value: 14
+			},{
+				label: 'test',
+				value: 15
+			},{
+				label: 'test',
+				value: 16
+			},{
+				label: 'test',
+				value: 17
+			},{
+				label: 'test',
+				value: 18
+			},{
+				label: 'test',
+				value: 19
+			}]
+		})
+		
+		jui2.bar({
+			items: [
+				'-',
+			{
+				text: 'Test'
+			},
+				'-',
+			{
+				role: 'button',
+				label: 'Toolbar Button',
+				'class': 'j-bg-inherit'
+			},{
+				role: 'menuButton',
+				label: 'Menu Button',
+				menu: [{
+					label: 'asdasd',
+					event: {
+						click: function(){
+							console.log('menu1')
+						}
+					}
+				}, {
+					label: 'asdasd'
+				}, {
+					label: 'asdasd'
+				}]
+			},{
+				icon: 'fa-envelope',
+				role: 'splitButton',
+				label: 'Split Button',
+				event: {
+					click: function(){
+						console.log('asd')
+					}
+				},
+				menu: [{
+					label: 'asdasd',
+					event: {
+						click: function(){
+							console.log('menu')
+						}
+					}
+				}, {
+					label: 'asdasd', 
+					menu: [{
+						label: 'asdasd',
+						event: {
+							click: function(){
+								console.log('menu1')
+							}
+						}
+					}, {
+						label: 'asdasd'
+					}, {
+						label: 'asdasd'
+					}]
+				}, {
+					label: 'asdasd', 
+					menu: [{
+						label: 'asdasd',
+						event: {
+							click: function(){
+								console.log('menu1')
+							}
+						}
+					}, {
+						label: 'asdasd'
+					}, {
+						label: 'asdasd'
+					}]
+				}]
+			}, '-']
+		});
+		jui2.datePicker({label: 'Date Picker'});
+		jui2.textField({icon: 'fa-search'});
+		jui2.passwordField({label: 'Password field'});
+		jui2.bar({
+			type: 'toolbar',
+			items: [
+				'-',
+			{
+				text: 'Test'
+			},
+				'-',
+			{
+				role: 'button',
+				label: 'Toolbar Button'
+			},{
+				role: 'menuButton',
+				label: 'Menu Button',
+				menu: [{
+					label: 'asdasd',
+					event: {
+						click: function(){
+							console.log('menu1')
+						}
+					}
+				}, {
+					label: 'asdasd'
+				}, {
+					label: 'asdasd'
+				}]
+			},{
+				icon: 'fa-envelope',
+				role: 'splitButton',
+				label: 'Split Button',
+				event: {
+					click: function(){
+						console.log('asd')
+					}
+				},
+				menu: [{
+					label: 'asdasd',
+					event: {
+						click: function(){
+							console.log('menu')
+						}
+					}
+				}, {
+					label: 'asdasd', 
+					menu: [{
+						label: 'asdasd',
+						event: {
+							click: function(){
+								console.log('menu1')
+							}
+						}
+					}, {
+						label: 'asdasd'
+					}, {
+						label: 'asdasd'
+					}]
+				}, {
+					label: 'asdasd', 
+					menu: [{
+						label: 'asdasd',
+						event: {
+							click: function(){
+								console.log('menu1')
+							}
+						}
+					}, {
+						label: 'asdasd'
+					}, {
+						label: 'asdasd'
+					}]
+				}]
+			}, '-']
+		});
+		jui2.button({label: 'Button'})
+		jui2.menuButton({
+			label: 'Menu Button',
+			menu: [{
+				label: 'asdasd',
+				event: {
+					click: function(){
+						console.log('menu1')
+					}
+				}
+			}, {
+				label: 'asdasd'
+			}, {
+				label: 'asdasd'
+			}]
+		})
+		jui2.splitButton({
+			label: 'Split Button',
+			icon: 'fa-envelope',
+			event: {
+				click: function(){
+					console.log('asd')
+				}
+			},
+			menu: [{
+				label: 'asdasd',
+				event: {
+					click: function(){
+						console.log('menu')
+					}
+				}
+			}, {
+				label: 'asdasd'
+			}, {
+				label: 'asdasd', 
+				menu: [{
+					label: 'asdasd',
+					event: {
+						click: function(){
+							console.log('menu1')
+						}
+					}
+				}, {
+					label: 'asdasd'
+				}, {
+					label: 'asdasd'
+				}]
+			}]
+		})
+		jui2.calendar()
+		jui2.monthPicker();
+		jui2.yearPicker();
+	})
+</script>
+<body bgcolor="#EEEEEE">
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<table jui2="true" role="table" title="Title 1" drop="[0]" data="json/table.json" server="true">
+	<thead>
+		<tr>
+			 <td>Test</td>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			 <td></td>
+		</tr>
+	</tbody>
+</table>asd
+<input id="test" icon="fa-search" jui2="true" role="textField" label="Search"></input>
+<div style="display: flex;height:100px;background:#dedede">asd<div style="flex:1"></div>asd<div style="flex:1"></div></div>
+</body>
+<script src="js/propeller.min.js"></script>

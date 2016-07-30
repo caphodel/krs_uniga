@@ -1,0 +1,4545 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='global-property-jui2'>/****js/core.js****/
+</span>var jui2;
+
+(function($) {
+<span id='jui2'>	/** @class jui2
+</span>		JUI2 class
+		@param {String/HTMLElement/NodeList} string selector
+		@return {jui2} array jui2 object collection
+	*/
+    jui2 = function(selector) {
+        return new Jui(selector);
+    };
+	
+    var Jui = function(selector) {
+        // Lets make a really simplistic selector implementation for demo purposes
+        var nodes = $(selector);
+        for (var i = 0; i &lt; nodes.length; i++) {
+			this[i] = nodes[i].hasAttribute('role') ? jui2[nodes[i].getAttribute('role')]({id: nodes[i].getAttribute('id')}) : nodes[i];
+        }
+        this.length = nodes.length;
+        return this;
+    };
+
+    // Expose the prototype object via jui2.fn so methods can be added later
+    jui2.fn = Jui.prototype = {
+        // API Methods
+        /*hide: function() {
+            for (var i = 0; i &lt; this.length; i++) {
+                this[i].style.display = 'none';
+            }
+            return this;
+        },
+        remove: function() {
+            for (var i = 0; i &lt; this.length; i++) {
+                this[i].parentNode.removeChild(this[i]);
+            }
+            return this;
+        }*/
+        // More methods here, each using 'return this', to enable chaining
+    };
+	
+<span id='jui2-method-random'>	/** 
+</span>		@method random
+		Function to create random string
+		@alias random
+		@param {Number} length
+		Length of the generated string
+		@param {String} chars
+		@private
+		String combination that allowed to generate, consist of 'a' representing lowercased alphabet char, 'A' for uppercased alphabet char, '#' for number and ! for other chars
+		
+		Example use:
+			@example
+			jui2.random(8, 'aA#')
+		
+		Those code will create a random character consist of uppercased and lowercased alphabet and number with 8 character length
+	*/
+	var random = function (length, chars) {
+		var result = mask = '';
+		/*if (chars.indexOf('a') &gt; -1)
+			mask += 'abcdefghijklmnopqrstuvwxyz';
+		if (chars.indexOf('A') &gt; -1)
+			mask += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+		if (chars.indexOf('#') &gt; -1)
+			mask += '0123456789';
+		if (chars.indexOf('!') &gt; -1)
+			mask += '~`!@#$%^&amp;*()_+-={}[]:&quot;;\'&lt;&gt;?,./|\\';*/
+			
+		var text = {
+			'a': 'abcdefghijklmnopqrstuvwxyz',
+			'A': 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+			'#': '0123456789',
+			'!': '~`!@#$%^&amp;*()_+-={}[]:&quot;;\'&lt;&gt;?,./|\\'
+		}
+		
+		for(i=chars.length;i--;)
+			mask+=text[chars[i]]
+			
+		for (var i = length; i &gt; 0; --i)
+			result += mask[Math.round(Math.random() * (mask.length - 1))];
+		return result;
+	}
+	jui2.random = random;
+	/*
+	jui2.messaging = {
+		addServer: function(name, event, target){
+			var self = this;
+			this.client[name] = [];
+			self.name = name
+			this.server[name] = function(e){
+				var e = e;
+				$.each(self.client[self.name], function(i, val){
+					val(e);
+				})
+			}
+			$(target).bind(event, this.server[name])
+		},
+		addClient: function(serverName, fn){
+			if(this.client[serverName]){
+				this.client[serverName].push(fn);
+				return this.client[serverName].length;
+			}
+		},
+		client: {},
+		server: {}
+	}*/
+	
+<span id='jui2-static-property-lang'>	/**
+</span>	*Variabel data kata-kata dalam berbagai bahasa
+	*@static lang*/
+	jui2.lang = {};
+	
+<span id='jui2-method-findHighestZIndex'>	/**
+</span>		@method findHighestZIndex
+		Fungsi untuk mencari z-index tertinggi
+		@return {Number} z-index
+		@private
+	*/
+	jui2.findHighestZIndex = function(){
+		return Math.max.apply(null,$.map($('body &gt; *'), function(e,n){
+           if($(e).css('position')=='absolute')
+                return parseInt($(e).css('z-index'))||1 ;
+           })
+		);
+	}
+	
+<span id='jui2-static-method-arrayToJson'>	/**
+</span>		@method arrayToJson
+		@param {Array} Array data
+		Fungsi untuk mengubah array menjadi json object
+		@return {Object} converted array as object
+		@static
+	*/
+	jui2.arrayToJson = function(arr) {
+		var ret = [];
+		for(i in arr){
+			var i = i;
+			ret[i] = {};
+			for(z in arr[i]){
+				ret[i][z] = arr[i][z];
+			}
+		}
+		return ret;
+	}
+	
+	$.fn.jui2Serialize = function(){
+		value = {};
+		this.find('[role=textField],[role=textArea],[role=dateField],[role=comboField],[role=datePicker],[role=passwordField],[role=radioField]').each(function(){
+			var el = $(this)
+			var role = el.attr('role')
+			value[el.attr('name')||el.attr('id')] = 
+				role=='textArea' &amp;&amp; (el.find('.j-textArea-editor p').html() || el.find('.j-textArea-editor').html() || '')
+				|| role=='comboField' &amp;&amp;
+					el.find('input[type=hidden]').val()
+				|| role=='radioField' &amp;&amp;
+					el.find('input:checked').val()
+				|| el.find('input').val()
+				
+			
+			/*if(el.attr('role')=='textArea'){
+				value[el.attr('name')||el.attr('id')] = el.find('.j-textArea-editor').html()
+				if(value[el.attr('name')||el.attr('id')]==null)
+					value[el.attr('name')||el.attr('id')] = ''
+			}
+			else if(el.attr('role')=='comboField')
+				value[el.attr('name')||el.attr('id')] = el.find('input[type=hidden]').val()
+			else if(el.attr('role')=='radioField')
+				value[el.attr('name')||el.attr('id')] = el.find('input:checked').val()
+			else
+				value[el.attr('name')||el.attr('id')] = el.find('input').val()*/
+		});
+		return value;
+	}
+	
+	$.jui2Reset = function(selector){
+		$.each(jui2(selector+' [role=textField],'+selector+' [role=textArea],'+selector+' [role=dateField],'+selector+' [role=comboField],'+selector+' [role=datePicker],'+selector+' [role=passwordField],'+selector+' [role=radioField]'), function(i, val){
+			val.reset &amp;&amp; val.reset();
+		})
+	}
+	
+<span id='jui2-static-method-define'>	/**
+</span>		@method define
+		@param {Function} Function that consist of variable
+		@param {String/HTMLElement/NodeList}
+		Fungsi mendefine variable yang di attach pada sebuah element, sehingga variable yang di create dengan fungsi ini akan hilang jika element tersebut hilang/di hapus.
+		@static
+	*/
+	jui2.define = function(fn, selector){
+		var $el = $(selector), varName = $el.attr('id')
+		window[varName] = {};
+		$.each(new fn(), function(i, val){
+			window[varName][i] = val;
+		})
+		
+		 $el.on('remove', function(){
+			window[varName] = null;
+		 })
+	}
+	
+<span id='jui2-static-method-iterateJson'>	/**
+</span>		@method iterateJson
+		@param {Object} JSON object
+		@param {Function} function that will be fired upon iteration
+		Fungsi untuk melakukan iterasi pada sebuah JSON object dengan fungsi yang akan di jalankan setiap 
+		@static
+	*/
+	jui2.iterateJson = function(json, fn){
+		for (var data in json) {
+			fn(json[data])
+			typeof json[data] == 'object' &amp;&amp;
+				jui2.iterateJson(json[data], fn)
+		}
+	}
+	
+<span id='jui2-static-method-clearNullFromJson'>	/**
+</span>		@method clearNullFromJson
+		@param {Object} JSON object
+		A function to remove null value from a JSON object
+		@static
+	*/
+	jui2.clearNullFromJson = function(json){
+		jui2.iterateJson(json, function(json){
+			if(typeof json == 'object')
+				for (var data in json) {
+					if(!json[data])
+						json[data] = ''
+				}
+		})
+	}
+	
+<span id='jui2-static-method-template'>	/**
+</span>		@method template
+		@param {String} String template
+		@param {Object} JSON object with value that will be applied to template
+		Simple template function
+		@return {String} Generated string from template and value in JSON object
+		@static
+	*/
+	jui2.template = function(template, json){
+		var fetch = !0, r = /{{(.*?)}}/gi
+		while(fetch){
+			fetch = r.exec(template)
+			template = template.replace(fetch[0], json[fetch[1]])
+		}
+		return template;
+	}
+	
+<span id='jui2-static-method-makeSure'>	/**
+</span>		@method makeSure
+		@param {String} Text displayed on confirm
+		Fungsi untuk menampilkan konfirmasi
+		@return {Boolean}
+		@static
+	*/
+	jui2.makeSure = function(text){
+		var r = confirm(text);
+		return r;
+	}
+	
+<span id='pin'>	/**
+</span>		@class pin
+		Digunakan untuk meng-attach element ke element lainnya
+		@extend jui2
+		@param {Object} options
+		Options for pin method
+	*/
+	jui2.pin = function(opt){
+		var opt = $.extend(!0, {
+<span id='pin-cfg-Selector'>			/**
+</span>				@cfg {string/HTMLElement/NodeList} Selector of element that will be pinned
+			*/
+			element: '',
+<span id='pin-cfg-Selector'>			/**
+</span>				@cfg {string/HTMLElement/NodeList} Selector of target element to be pinned to
+			*/
+			target: 'body',
+<span id='pin-cfg-element'>			/**
+</span>				@cfg {string} element attachment position, consist of 2 word separated with space.
+				Available options is top and bottom for vertical position, and left, right and horizontalcenter for horizontal position
+			*/
+			attachment: 'top left',
+<span id='pin-cfg-target'>			/**
+</span>				@cfg {string} target element attachment position, consist of 2 word separated with space.
+				Available options is top and bottom for vertical position, and left, right and horizontalcenter for horizontal position
+			*/
+			targetAttachment: 'bottom left'
+		}, opt), self = this;
+		
+		self.attachment = {
+			left: 'left',
+			top: 'top'
+		}
+		
+		self.targetAttachment = {
+			left: 'bottom',
+			top: 'top'
+		}
+		
+		self.opt = opt;
+		
+		self.element = $(opt.element).css('position', 'absolute')
+		self.target = $(opt.target);
+<span id='pin-method-position'>		/**
+</span>			@method position
+			Function to repositioning the attached element position
+		*/
+		self.position = function(){
+			self.top = self.target.offset().top, self.left = self.target.offset().left;
+			if(opt.attachment.search(/bottom/i)!=-1)
+				self.top -= self.element .outerHeight(!1)
+			if(opt.attachment.search(/right/i)!=-1)
+				self.left -= self.element .outerWidth(!1)
+			if(opt.attachment.search(/horizontalcenter/i)!=-1)
+				self.left -= self.element .outerWidth(!1)/2
+
+			if(opt.targetAttachment.search(/bottom/i)!=-1)
+				self.top += self.target.outerHeight(!1)
+			if(opt.targetAttachment.search(/right/i)!=-1)
+				self.left += self.target.outerWidth(!1)
+			if(opt.targetAttachment.search(/horizontalcenter/i)!=-1)
+				self.left += self.target.outerWidth(!1)/2
+			self.element.offset({ top: self.top, left: self.left})
+		}
+<span id='pin-method-setOptions'>		/**
+</span>			@method setOptions
+			Function to set/edit the pinned element options
+		*/
+		self.setOptions = function(opt){
+			self.opt = $.extend(!0, self.opt, opt)
+		}
+		
+		self.position();
+		
+		return self;
+	}
+
+}(jQuery))
+
+$( document ).ready(function() {
+	jui2.oms.createServer(function(){}, 'body');
+	$(document).click(function(e){
+		jui2.oms.sendToClients(e, 'body')
+	})
+	$(document).bind('mousedown', function(e){
+		e = e || window.event;
+		switch (e.which) {
+			case 1: 
+				//if($(e.target).hasClass()
+				if($(e.target).parents('.j-right-menu').length==0)
+					$('.j-right-menu').hide();
+			break;
+			case 2: $('.j-right-menu').hide(); break;
+		}
+	})
+	window.onerror = function(message, url, linenumber) {
+		//console(&quot;JavaScript error: &quot; + message + &quot; on line &quot; + linenumber + &quot; for &quot; + url);
+		if(jui2.onerror)
+			jui2.onerror(message, url, linenumber)
+		$.each(jui2('[role=overlay]'), function(i,val){
+			val.destroy();
+		})
+	}
+});
+
+(function($) {
+    $.fn.hasScrollBar = function() {
+        return this.get(0).scrollHeight &gt; this.height();
+    }
+	
+    $.fn.hasScrollBarHor = function() {
+        return this.get(0).scrollWidth &gt; this.width();
+    }
+	
+	jQuery.fn.center = function () {
+		var $self = $(this), $parent = $self.parent(), self = this;
+		self.css(&quot;position&quot;,&quot;absolute&quot;);
+		self.css(&quot;top&quot;, Math.max(0, (($parent.height() - $self.outerHeight(!0)) / 2) + 
+													$parent.scrollTop()) + &quot;px&quot;);
+		self.css(&quot;left&quot;, Math.max(0, (($parent.width() - $self.outerWidth(!0)) / 2) + 
+													$parent.scrollLeft()) + &quot;px&quot;);
+		return self;
+	}
+})(jQuery);
+/*
+$('body').bind('mousedown', function(e){
+e = e || window.event;
+  switch (e.which) {
+    case 1: console.log('left'); break;
+    case 2: console.log('middle'); break;
+    case 3: console.log('right'); break; 
+  }
+<span id='pin-property-'>})*/;/****js/lang.monthPicker.js****/
+</span>(function($){
+
+	jui2.lang.monthPicker = {
+		en: {
+			jan: {
+				short: 'Jan',
+				long: 'January'
+			},
+			feb: {
+				short: 'Feb',
+				long: 'February'
+			},
+			mar: {
+				short: 'Mar',
+				long: 'March'
+			},
+			apr: {
+				short: 'Apr',
+				long: 'April'
+			},
+			may: {
+				short: 'May',
+				long: 'May'
+			},
+			jun: {
+				short: 'Jun',
+				long: 'June'
+			},
+			jul: {
+				short: 'Jul',
+				long: 'July'
+			},
+			aug: {
+				short: 'Aug',
+				long: 'August'
+			},
+			sep: {
+				short: 'Sep',
+				long: 'September'
+			},
+			oct: {
+				short: 'Oct',
+				long: 'October'
+			},
+			nov: {
+				short: 'Nov',
+				long: 'November'
+			},
+			dec: {
+				short: 'Dec',
+				long: 'December'
+			},
+		}
+	}
+	
+<span id='pin-property-'>}(jQuery));/****js/oms.js****/
+</span>(function($){
+
+	jui2.oms = {
+		server: {},
+		append: function(name, fn, server){
+			if(this.server[server])
+				if(!this.server[server].client[name])
+					this.server[server].client[name] = fn;
+		},
+		remove: function(name, server){
+			delete this.server[server].client[name];
+		},
+		createServer: function(fn, name){
+			this.server[name] = {
+				fn: fn,
+				client: {}
+			}
+		},
+		removeServer: function(name){
+			delete this.server[name];
+		},
+		sendToClients: function(msg, server){
+			$.each(this.server[server].client, function(i, val){
+				val(msg);
+			})
+		},
+		sendToClient: function(msg, client){
+			this.server[server].clients[client](msg);
+		},
+		sendToServer: function(msg, server){
+			this.server[server].fn(msg);
+		}
+	}
+
+<span id='pin-property-'>}(jQuery));/****js/widget/bar.js****/
+</span>(function($){
+	
+	var bar = function(opt){
+		var defaults = {id: 'j-no-id'}, self = this;
+		
+		$.extend(!0, defaults, opt)
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+		
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+		
+			opt = opt || {}
+			var defaults = {
+				id: 'j-'+jui2.random(8, 'aA#'),
+				disabled: !1,
+				items: [],
+				event: {},
+				type: 'bar'
+			}
+			
+			$.extend(!0, defaults, opt);
+			
+			var output = $(jui2.tmpl.tmpl_bar(defaults));
+			
+			0 in target &amp;&amp; target.replaceWith(output) || defaults.parent &amp;&amp; $(defaults.parent).append(output) || $('body').append(output);
+			
+			/*if(target.length &gt; 0){
+				target.replaceWith(output);
+			}
+			else if(defaults.parent){
+				$(defaults.parent).append(output)
+			}
+			else{
+				$('body').append(output);
+			}*/
+			
+			for(var i = 0;i&lt;defaults.items.length;i++){
+				var obj = defaults.items[i];
+				if(obj == '-'){
+					jui2.spacer({parent: output});
+				}
+				else if(!obj.role){
+					obj.label = obj.text;
+					obj.parent = output;
+					jui2.text(obj);
+				}
+				else{
+					obj.parent = output;
+					jui2[obj.role](obj);
+				}
+			}
+			
+			self[0] = output;
+			self.length = 1;
+			
+			return self;
+			
+		}
+	}
+	
+	jui2.bar = function(opt) {
+        return new bar(opt);
+    };
+	
+	jui2.bar.fn = bar.prototype;
+	
+	jui2.bar.fn.disable = function(){
+		var el = this[0]
+		if(!el.hasClass('j-disabled')){
+			el.addClass('j-disabled');
+			if(el.data().events){
+				el.data().events._click = el.data().events.click;
+				el.data().events.click = null;
+			}
+		}
+	}
+	
+	jui2.bar.fn.enable = function(){
+		var el = this[0]
+		if(el.hasClass('j-disabled')){
+			el.removeClass('j-disabled');
+			if(el.data().events){
+				el.data().events.click = el.data().events._click;
+				el.data().events._click = null;
+			}
+		}
+	}
+	
+<span id='pin-property-'>}(jQuery));/****js/widget/button.js****/
+</span>(function($){
+<span id='jui2-button'>/** JUI2 button UI
+</span>	@class jui2.button
+	@extend jui2
+	@param {Object} button options
+	@return {Object} jui2 button object
+	@author Deddy Lasmono Putro
+	@docauthor Deddy Lasmono Putro
+	Example Usage:
+	
+		@example
+		jui2.button({
+			label: 'Button'
+		})
+		
+	To create button with click event, you can add event using javascript like in this example:
+	
+		@example
+		jui2.button({
+			label: 'Button',
+			event: {
+				click: function(button){
+					console.log('Button clicked!');
+				}
+			}
+		})
+		
+	This one is the HTML version example:
+	
+		@example
+		&lt;button jui2=&quot;true&quot; role=&quot;button&quot; event=&quot;event&quot;&gt;&lt;/button&gt;
+		&lt;script&gt;
+			var event = {
+				click: function(){
+					console.log('Button clicked!');
+				}
+			}
+			jui2.create()
+		&lt;/script&gt;
+ */
+	var button = function(opt){
+		var defaults = {id: 'j-no-id'}, self = this;
+		
+		$.extend(!0, defaults, opt)
+			
+<span id='jui2-button-cfg-target'>		/**
+</span>			@cfg {selector} target
+			A selector of target element that will be replaced with this UI
+		*/
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+		
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+		
+			opt = opt || {}
+			var defaults = {
+<span id='jui2-button-cfg-id'>				/**
+</span>					@cfg {string} id
+					will be auto generated string if leave blank
+				*/
+				id: 'j-'+jui2.random(8, 'aA#'),
+<span id='jui2-button-cfg-label'>				/**
+</span>					@cfg {string} label
+					Text that will be shown on button
+				*/
+				label: '',
+<span id='jui2-button-cfg-icon'>				/**
+</span>					@cfg {string} icon
+					CSS class of icon
+				*/
+				icon: '',
+<span id='jui2-button-cfg-disabled'>				/**
+</span>					@cfg {boolean} disabled
+					True if this button disabled
+				*/
+				disabled: !1,
+<span id='jui2-button-cfg-event'>				/**
+</span>					@cfg {Object} event
+					@cfg {Function} event.click
+					@param {object} JUI2 button UI object
+					Click event that fired when UI is clicked on
+				*/
+				event: {}
+			}
+			
+			$.extend(!0, defaults, opt);
+			
+			var output = $(jui2.tmpl.tmpl_button(defaults));
+			
+<span id='jui2-button-cfg-parent'>			/**
+</span>				@cfg {String/HTMLElement/NodeList} parent
+				Parent selector is a element selector wich this UI will be appended if exist
+			*/
+			0 in target &amp;&amp; target.replaceWith(output) || defaults.parent &amp;&amp; $(defaults.parent).append(output) || $('body').append(output);
+			
+			/*if(target.length &gt; 0){
+				target.replaceWith(output);
+			}
+			else if(defaults.parent){
+				$(defaults.parent).append(output)
+			}
+			else{
+				$('body').append(output);
+			}*/
+			
+			self.defaults = defaults
+			
+			if(typeof defaults.event.click == 'function')
+				output.on('click', function(e){
+					e.preventDefault;
+					defaults.event.click(output[0].jui2)
+				});
+			//output[0].jui2.defaults = defaults;
+			
+			output[0].jui2 = self;
+			self[0] = output[0];
+			self.length = 1;
+		
+			return self;
+			
+		}
+	}
+	
+	jui2.button = function(opt) {
+        return new button(opt);
+    };
+	
+	jui2.button.fn = button.prototype;
+<span id='jui2-button-method-disable'>	/** @method disable
+</span>		disable enabled button UI
+	*/
+	jui2.button.fn.disable = function(){
+		var el = $(this[0])
+		if(!el.hasClass('j-disabled')){
+			el.addClass('j-disabled');
+			el.off('click')
+		}
+	}
+<span id='jui2-button-method-enable'>	/** @method enable
+</span>		enable disabled button UI
+	*/
+	jui2.button.fn.enable = function(){
+		var el = $(this[0])
+		if(el.hasClass('j-disabled')){
+			el.removeClass('j-disabled');
+			el.on('click',function(e){
+				e.preventDefault;
+				el[0].jui2.defaults.event.click(el[0].jui2)
+			})
+		}
+	}
+<span id='jui2-button-method-destroy'>	/** @method destroy
+</span>		destroy button UI
+	*/
+	jui2.button.fn.destroy = function(){
+		$(this[0]).remove()
+		this[0] = null;
+	}
+	
+<span id='jui2-button-property-'>}(jQuery));/****js/widget/calendar.js****/
+</span>(function($){
+	
+	var calendar = function(opt){
+		var defaults = {id: 'j-no-id'}, self = this, format = 'DD-MM-YYYY';
+		
+		$.extend(!0, defaults, opt)
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+		
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+			
+			opt = opt || {}
+			var defaults = {
+				id: 'j-'+jui2.random(8, 'aA#'),
+				disabled: !1,
+				event: {},
+				type: 'calendar',
+				lang: 'en',
+				date: moment().format(format)
+			}
+			
+			$.extend(!0, defaults, opt);
+			
+			if(moment(defaults.date, format).format()=='Invalid date')
+				defaults.date = moment().format(format);
+			defaults.datesOfMonth = jui2.tmpl.tmpl_calendarDate({
+				weeks: self.getDatesOfMonth(moment().diff(moment(defaults.date, format), 'month'))
+			})
+			defaults.dateName = self.lang[defaults.lang];
+			
+			var output = $(jui2.tmpl.tmpl_calendar(defaults));
+			
+			//generate top toolbar
+			jui2.bar({
+				parent: output.find('.j-calendar-top-toolbar'),
+				//'class': 'j-bg-inherit',
+				items: [{
+					role: 'button',
+					icon: 'fa-chevron-left',
+					'class': 'j-bg-inherit j-border-inherit',
+					event:{
+						click: function(){
+							self.changeMonth(-1)
+						}
+					}
+				}, '-', {
+					role: 'button',
+					label: moment(defaults.date, format).format('MMMM YYYY'),
+					'class': 'j-bg-inherit j-calendar-select-month j-border-inherit',
+					event:{
+						click: function(){
+							self.monthPicker();
+						}
+					}
+				}, '-', {
+					role: 'button',
+					icon: 'fa-chevron-right',
+					'class': 'j-bg-inherit j-border-inherit',
+					event:{
+						click: function(){
+							self.changeMonth(1)
+						}
+					}
+				}]
+			})
+			
+			//generate bottom toolbar
+			jui2.bar({
+				parent: output.find('.j-calendar-bottom-toolbar'),
+				//'class': 'j-bg-inherit',
+				items: ['-', {
+					role: 'button',
+					label: 'Today',
+					//'class': 'j-border-inherit',
+					event:{
+						click: function(){
+							self.month = 0
+							self.changeMonth(0);
+							self.value = moment().format(format);
+							output.find('[value='+self.value+']').addClass('j-calendar-selected')
+							if(self.event.click)
+								self.event.click(self);
+						}
+					}
+				}, '-']
+			})
+			
+			0 in target &amp;&amp; target.replaceWith(output) || defaults.parent &amp;&amp; $(defaults.parent).append(output) || $('body').append(output);
+			
+			/*if(target.length &gt; 0){
+				target.replaceWith(output);
+			}
+			else if(defaults.parent){
+				$(defaults.parent).append(output)
+			}
+			else{
+				$('body').append(output);
+			}*/
+			
+			self.month= 0;
+			self.value= defaults.date;
+			self.date= defaults.date;
+			self.event= defaults.event;
+			
+			output[0].jui2 = self;
+			output.find('[value='+self.value+']').addClass('j-calendar-selected')
+			
+			self.event.click = defaults.event.click &amp;&amp; defaults.event.click;
+
+			self.length = 1;
+			
+			output.find('tbody td').click(function(){
+				output[0].jui2.value = $(this).attr('value')
+				output.find('tbody td').removeClass('j-calendar-selected')
+				$(this).addClass('j-calendar-selected')
+				output[0].jui2.event.click &amp;&amp; output[0].jui2.event.click(self)
+			})
+			
+			self[0] = output[0];
+			self.length = 1;
+			
+			return self;
+			
+		}
+	}
+	
+	jui2.calendar = function(opt) {
+        return new calendar(opt);
+    };
+	
+	jui2.calendar.fn = calendar.prototype;
+	
+	jui2.bar.fn.disable = function(){
+		var el = this[0]
+		if(!el.hasClass('j-disabled')){
+			el.addClass('j-disabled');
+			if(el.data().events){
+				el.data().events._click = el.data().events.click;
+				el.data().events.click = null;
+			}
+		}
+	}
+	
+	jui2.bar.fn.enable = function(){
+		var el = this[0]
+		if(el.hasClass('j-disabled')){
+			el.removeClass('j-disabled');
+			if(el.data().events){
+				el.data().events.click = el.data().events._click;
+				el.data().events._click = null;
+			}
+		}
+	}
+	
+	jui2.calendar.fn.changeMonth = function(offset){
+		var self = this, el = $(this[0])
+		this.month += offset;
+		el.find('tbody').empty().append(jui2.tmpl.tmpl_calendarDate({weeks: this.getDatesOfMonth(this.month)}))
+		el.find('.j-calendar-select-month span span').text(moment().add('M', this.month).format('MMMM YYYY'))
+		el.find('tbody td').click(function(){
+			self.value = $(this).attr('value');
+			el.find('tbody td').removeClass('j-calendar-selected');
+			$(this).addClass('j-calendar-selected');
+			self.event.click &amp;&amp; self.event.click(self);
+		})
+	}
+	
+	jui2.calendar.fn.getDatesOfMonth = function(offset){
+		offset = offset || 0;
+		var firstDate = moment().add('M', offset).startOf('month').startOf('week'), weeks = [];
+		for(var i=0;i&lt;42;i++){
+			var weekNumber = ~~(i/7);
+			if(!weeks[weekNumber])
+				weeks[weekNumber] = []
+			weeks[weekNumber].push({text: firstDate.get('D'), value: firstDate.format('DD-MM-YYYY')})
+			firstDate.add('d',1)
+		}
+		return weeks;
+	}
+	
+	jui2.calendar.fn.monthPicker = function(){
+		var calendar = this, $el = $(this[0]), overlay = jui2.overlay({id: $(this[0]).attr('id')+'-overlay', overlayTarget: this[0], 'class': 'j-calendar-overlay', content:'&lt;div style=&quot;flex:1;display: flex;&quot;&gt;&lt;/div&gt;'})
+		var month = jui2.monthPicker({parent: '#'+$el.attr('id')+'-overlay div', 'class': 'j-calendar-monthPicker', month: this.value.split('-')[1]}), year = jui2.yearPicker({parent: '#'+$el.attr('id')+'-overlay div', 'class': 'j-calendar-yearPicker', year: this.value.split('-')[2]})
+		calendar.overlay = overlay;
+		jui2.bar({
+			parent: '#'+$(this[0]).attr('id')+'-overlay',
+			items:['-', {
+				role: 'button',
+				label: 'OK',
+				'class': 'j-border-inherit',
+				event: {
+					click: function(self){
+						calendar.changeMonth(moment(month.value+'-'+year.value, 'MM-YYYY').diff(moment($(calendar[0]).find('.j-calendar-select-month').text(),'MMM-YYYY'), 'month'));
+						overlay.destroy();
+						calendar.overlay = !1;
+					}
+				}
+			},{
+				role: 'button',
+				label: 'Cancel',
+				'class': 'j-border-inherit',
+				event: {
+					click: function(self){
+						overlay.destroy();
+						calendar.overlay = !1;
+					}
+				}
+			}, '-']
+		})
+	}
+	
+	jui2.calendar.fn.destroy = function(){
+		this[0].remove()
+		this[0] = null;
+	}
+	
+	jui2.calendar.fn.lang = {
+		en: {
+			sun: {
+				'short': 'Sun',
+				'long': 'Sunday'
+			},
+			mon: {
+				'short': 'Mon',
+				'long': 'Monday'
+			},
+			tue: {
+				'short': 'Tue',
+				'long': 'Tuesday'
+			},
+			wed: {
+				'short': 'Wed',
+				'long': 'Wednesday'
+			},
+			thu: {
+				'short': 'Thu',
+				'long': 'Thursday'
+			},
+			fri: {
+				'short': 'Fri',
+				'long': 'Friday'
+			},
+			sat: {
+				'short': 'Sat',
+				'long': 'Saturday'
+			}
+		}
+	}
+	
+<span id='jui2-button-property-'>}(jQuery));/****js/widget/checkbox.js****/
+</span>(function($){
+	
+	var checkboxField = function(opt){
+		var defaults = {id: 'j-no-id'}, self = this;
+		
+		$.extend(!0, defaults, opt)
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+		
+			opt = opt || {}
+			var rand = jui2.random(8, 'aA#');
+			var defaults = {
+				id: 'j-'+rand,
+				name: 'j-'+rand,
+				disabled: !1,
+				items: []
+			}
+			
+			$.extend(!0, defaults, opt);
+			for(var i=defaults.items.length;i--;)
+				defaults.items[i].id = 'j-'+jui2.random(8, 'aA#')
+			/*for(var i = 0;i&lt;defaults.items.length;i++){
+				defaults.items[i].id = 'j-'+jui2.random(8, 'aA#')
+			}*/
+			
+			var output = $(jui2.tmpl.tmpl_checkboxField(defaults));
+			
+			0 in target &amp;&amp; target.replaceWith(output) || defaults.parent &amp;&amp; $(defaults.parent).append(output) || $('body').append(output);
+			
+			/*if(target.length &gt; 0){
+				target.replaceWith(output);
+			}
+			else if(defaults.parent){
+				$(defaults.parent).append(output)
+			}
+			else{
+				$('body').append(output);
+			}*/
+			output.find('input').click(function(){
+				defaults.event.click(self.checked, self.value)
+			})
+			
+			output[0].jui2 = self;
+			self[0] = output[0];
+			self.length = 1;
+		
+			return self;
+			
+		}
+	}
+	
+	jui2.checkboxField = function(opt) {
+        return new checkboxField(opt);
+    };
+	
+	jui2.checkboxField.fn = checkboxField.prototype;
+	
+	jui2.checkboxField.fn.disable = function(){
+		
+	}
+	
+	jui2.checkboxField.fn.enable = function(){
+		
+	}
+	
+	jui2.checkboxField.fn.close = function(){
+		this[0].hide()
+	}
+	
+	jui2.checkboxField.fn.destroy = function(){
+		this[0].remove()
+		this[0] = null;
+	}
+	
+<span id='jui2-button-property-'>}(jQuery));/****js/widget/comboField.js****/
+</span>(function($){
+	
+	var comboField = function(opt){
+		var defaults = {id: 'j-no-id'}, self = this;
+		
+		$.extend(!0, defaults, opt)
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+		
+			opt = opt || {}
+			var defaults = {
+				id: 'j-'+jui2.random(8, 'aA#'),
+				disabled: !1,
+				event: {},
+				server: !1,
+				display: [1],
+				pk: 0
+			}
+			
+			$.extend(!0, defaults, opt);
+			
+			var output = $(jui2.tmpl.tmpl_comboField(defaults));
+			
+			output.find('input').first().bind('keypress', function(evt){
+				var keycode = evt.charCode || evt.keyCode;
+				//if (keycode  == 13) { //Enter key's keycode
+				return !0;
+				//}
+			})
+			
+			0 in target &amp;&amp; target.replaceWith(output) || defaults.parent &amp;&amp; $(defaults.parent).append(output) || $('body').append(output);
+			
+			/*if(target.length &gt; 0){
+				target.replaceWith(output);
+			}
+			else if(defaults.parent){
+				$(defaults.parent).append(output)
+			}
+			else{
+				$('body').append(output);
+			}*/
+				
+			output[0].jui2 = self;
+			self[0] = output[0];
+			self.length = 1;
+			output[0].jui2.defaults = defaults
+			
+			if(typeof defaults.items == 'string'){
+				output[0].jui2.param = {
+					sEcho : -1,
+					iDisplayLength : 10,
+					iDisplayStart : 0,
+					iSortCol_0 : 0,
+					sSearch : defaults.value||'',
+					sSortDir_0 : '',
+					iTotalRecords: 0
+				}
+				
+				self.generateItemList()
+				
+				$(self[0]).click(function(){
+					self.itemsEl &amp;&amp;
+						self.itemsEl.is(':visible') &amp;&amp; self.itemsEl.hide() || self.generateItemList(!0)
+					||
+						self.generateItemList(!0)
+				})
+				output[0].jui2.param.sSearch = ''
+			}
+			else{
+				var elInput = output.find('input')
+				$.each(defaults.items, function(i, val){
+					if(defaults.value)
+						if(defaults.value.toString() == val.value.toString()){
+							elInput.last().val(val.value)
+							elInput.first().val(val.label)
+						}
+					defaults.items[i].label = '&lt;td&gt;'+val.label+'&lt;/td&gt;'
+							
+				})
+				var items = $(jui2.tmpl.tmpl_listItems({items: defaults.items}));
+				$(defaults.vr || 'body').append(items);
+				items.css('z-index', jui2.findHighestZIndex()+1)
+				output[0].jui2.tether = jui2.pin({
+					element: items,
+					target: output.find('input').first(),
+					attachment: 'top left',
+					targetAttachment: 'bottom left'
+				})
+				/*output[0].jui2.tether = new Tether({
+					element: items,
+					target: output.find('input').first(),
+					attachment: 'top left',
+					targetAttachment: 'bottom left',
+					constraints: [{
+						to: 'window',
+						attachment: 'together none',
+						pin: !0
+					}]
+				});*/
+				
+				
+				
+				items.hide()
+				
+				jui2.oms.remove(defaults.id, 'body')
+				
+				jui2.oms.append(defaults.id, function(e){
+					var $target = $(e.target)
+					if(items.is(':visible') &amp;&amp; $target.closest('.j-listItems').length ^ 1 &amp;&amp; $target.closest('.j-comboField').length ^ 1)
+						items.hide()
+				}, 'body')
+				
+				items.click(function(e){
+					var elTarget = e.target, elInput = output.find('input')
+					if(elTarget.tagName == 'TD'){
+						elInput.last().val($(elTarget).closest('tr').attr(&quot;value&quot;))
+						elInput.first().val(elTarget.innerHTML)
+						items.hide()
+					}
+				})
+				
+				output.click(function(){
+					/*if(items.is(':visible'))
+						items.hide()
+					else
+						items.show();*/
+					if(output.find('input').attr('readonly')!='readonly'){
+						items.is(':visible') &amp;&amp; items.hide() || ($('[role=listItems]').hide(), items.show())
+						output[0].jui2.tether.position()
+					}
+				})
+				
+				output.on('remove', function(){
+					items.remove()
+				});
+			}
+			return self;
+			
+		}
+	}
+	
+	jui2.comboField = function(opt) {
+        return new comboField(opt);
+    };
+	
+	jui2.comboField.fn = comboField.prototype;
+	
+	jui2.comboField.fn.disable = function(){
+		$(this[0]).find('input').attr('readonly', !0)
+		return this;
+	}
+	
+	jui2.comboField.fn.enable = function(){
+		$(this[0]).find('input').removeAttr('readonly')
+		return this;
+	}
+	
+	jui2.comboField.fn.close = function(){
+		this[0].hide()
+	}
+	
+	jui2.comboField.fn.destroy = function(){
+		this[0].remove()
+		this[0] = null;
+	}
+	
+	jui2.comboField.fn.search = function(sSearch){
+		var self = this;
+	}
+	
+	jui2.comboField.fn.val = function(value){
+		if(this.param){
+			var tmp = this.param.sSearch, self = this
+			self.defaults.value = self.param.sSearch = value || ''
+			self.param.sSearch = tmp
+			self.generateItemList();
+			return value || $(self[0]).find('input').last().val();
+		}
+		else{
+			var tmp = false, self = this
+			self.defaults.value = value || ''
+			$.each(self.defaults.items, function(i, val){
+				if(val.value==value){
+					$(self[0]).find('input').first().val(val.label.replace(/(&lt;([^&gt;]+)&gt;)/ig, ''))
+					$(self[0]).find('input').last().val(val.value)
+				}
+			})
+			return value || $(self[0]).find('input').last().val();
+		}
+	}
+	
+	jui2.comboField.fn.reset = function(){
+		var $input = $(this[0]).find('input');
+		$input.last().val('')
+		$input.first().val('')
+	}
+	
+	jui2.comboField.fn.generateItemList = function(show){
+		var show = show, self = this, param = self.param, $input = $(this[0]).find('input'), $self = $(self[0]);
+		param.sEcho++;
+		//$.getJSON(self.defaults.items, self.param)
+		$.ajax({
+			dataType: &quot;json&quot;,
+			url: self.defaults.items,
+			type: 'POST',
+			data: param
+		}).done(function(data){
+			if(param.sEcho==data.sEcho){
+				self.items = new Array();
+				self.data = {};
+				param.totalPage = data.iTotalRecords-1;
+				if(data.aaData){
+					jui2.clearNullFromJson(data.aaData);
+					for(var i=0;i&lt;param.iDisplayLength;i++){
+						if(data.aaData[i]){
+							var val = data.aaData[i], label = '', display = [];
+							for(z=0;z&lt;self.defaults.display.length;z++){
+								label += '&lt;td style=&quot;padding-right: 10px;&quot;&gt;'+val[self.defaults.display[z]]+'&lt;/td&gt;'
+								display.push(val[self.defaults.display[z]])
+							}
+							if(self.defaults.value)
+								if(self.defaults.value.toString() == val[self.defaults.pk].toString()){
+									$input.first().val(display.join(', '))
+									$input.last().val(val[self.defaults.pk])
+								}
+							self.data[val[self.defaults.pk]] = val
+							self.items.push({label: label, value: val[self.defaults.pk]})
+						}
+					}
+				}
+				$.each(data, function(i, val){
+					param[i] = i^'aaData' &amp;&amp; val
+				})
+				param.iTotalRecords = data.iTotalRecords
+				//var dataToBeShowed = (self.defaults.server == !0) ? self.aaData().start(0).limit(self.param.iDisplayLength).get() : self.aaData().start(self.param.iDisplayStart).limit(self.param.iDisplayLength).get();
+				var items = $(jui2.tmpl.tmpl_listItems({items: self.items, 'displayName': self.defaults['display-name']}));
+
+				self.itemsEl &amp;&amp; self.itemsEl.remove();
+				
+				$self.on('remove', function(){
+					self.itemsEl.remove()
+				});
+				
+				self.itemsEl = items;
+				
+				$(self.defaults.vr || 'body').append(items);
+				
+				jui2.bar({
+					parent: items.find('.j-listItems-top-toolbar'),
+					items:[{
+						role: 'textField',
+						icon: 'fa-search',
+						'class': 'j-listItems-searchText',
+						value: param.sSearch
+					},{
+						role: 'button',
+						label: 'Search',
+						event: {
+							click: function(e){
+								param.sSearch = $(e[0]).parents('.j-listItems-top-toolbar').find('.j-listItems-searchText input').val()
+								param.iDisplayStart  = 0;
+								self.generateItemList(!0)
+							}
+						}
+					}]
+				})
+				
+				jui2.bar({
+					parent: items.find('.j-listItems-bottom-toolbar'),
+					items:[{
+						role: 'button',
+						label: 'Prev',
+						event: {
+							click: function(e){
+								//param.iDisplayStart = parseInt(param.iDisplayStart)&gt;0 ? +function(){self.generateItemList(!0);return parseInt(param.iDisplayStart)-parseInt(param.iDisplayLength)}()
+								if(+param.iDisplayStart&gt;0){
+									param.iDisplayStart = +param.iDisplayStart- +param.iDisplayLength
+									self.generateItemList(!0)
+								}
+							}
+						}
+					},{
+						role: 'button',
+						label: 'Next',
+						event: {
+							click: function(e){
+								if(param.totalPage&gt;(+param.iDisplayLength+ +param.iDisplayStart)){
+									param.iDisplayStart = +param.iDisplayStart+ +param.iDisplayLength
+									self.generateItemList(!0)
+								}
+							}
+						}
+					}, '-', {//-~ = Math.ceil
+						text: 'Page '+(-~(param.iDisplayStart/param.iDisplayLength))+'/'+ -~(param.iTotalRecords/param.iDisplayLength),
+						&quot;class&quot;: 'j-itemList-pageOf'
+					}]
+				})
+				
+				items.css('z-index', jui2.findHighestZIndex()+1)
+				
+				self.tether = jui2.pin({
+					element: items,
+					target: $self.find('input').first(),
+					attachment: 'top left',
+					targetAttachment: 'bottom left'
+				})
+				/*new Tether({
+					element: items,
+					target: $self.find('input').first(),
+					attachment: 'top left',
+					targetAttachment: 'bottom left',
+					constraints: [{
+						to: 'window',
+						attachment: 'together none',
+						pin: !0
+					}]
+				});*/
+				
+				jui2.oms.remove($self.attr('id'), 'body')
+				
+				jui2.oms.append($self.attr('id'), function(e){
+					if(items.is(':visible') &amp;&amp; $(e.target).closest('.j-listItems').length ^ 1 &amp;&amp; $(e.target).closest('.j-comboField').length != 1)
+						items.remove()
+				}, 'body')
+				
+				items.click(function(e){
+					if($(e.target).closest('tr').length==1 &amp;&amp; !$(e.target).closest('tr').hasClass('j-listItems-header')){
+						var el = $(e.target).closest('tr'), optionTexts = [], $input = $self.find('input'), ev = self.defaults.event;
+						el.find('td').each(function() { optionTexts.push($(this).text()) });
+						$input.last().val(el.attr(&quot;value&quot;))
+						$input.first().val(optionTexts.join(', '))
+						items.hide()
+						/*if(ev.select)
+							ev.select(el.attr(&quot;value&quot;), optionTexts)*/
+						ev.select &amp;&amp; ev.select(el.attr(&quot;value&quot;), optionTexts, self.data[el.attr(&quot;value&quot;)], self)
+					}
+				})
+				
+				$self.unbind('click').click(function(){
+					items.is(':visible') &amp;&amp; items.hide() || self.generateItemList(!0)
+					/*if(items.is(':visible'))
+						items.hide()
+					else{
+						self.generateItemList(!0)
+					}*/
+				})
+				
+				items.hide()
+				
+				if($self.find('input').attr('readonly')!='readonly'){
+					!show &amp;&amp; items.hide() || ($('[role=listItems]').hide(), items.show(), self.tether.position())
+				}
+				/*if(!show){
+					items.hide()
+				}
+				else{
+					items.show();
+					self.tether.position()
+				}*/
+			}
+		})
+	}
+	
+<span id='jui2-button-property-'>}(jQuery));/****js/widget/datePicker.js****/
+</span>(function($){
+	
+	var datePicker = function(opt){
+		var defaults = {id: 'j-no-id'}, self = this;
+		
+		$.extend(!0, defaults, opt)
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+		
+			opt = opt || {}
+			var defaults = {
+				id: 'j-'+jui2.random(8, 'aA#'),
+				disabled: !1,
+				event: {}
+			}
+			
+			$.extend(!0, defaults, opt);
+			
+			var output = $(jui2.tmpl.tmpl_datePicker(defaults));
+			
+			
+			0 in target &amp;&amp; target.replaceWith(output) || defaults.parent &amp;&amp; $(defaults.parent).append(output) || $('body').append(output);
+			
+			/*if(target.length &gt; 0){
+				target.replaceWith(output);
+			}
+			else if(defaults.parent){
+				$(defaults.parent).append(output)
+			}
+			else{
+				$('body').append(output);
+			}*/
+			
+			output.find('input').click(function(){
+				output[0].jui2.showPicker();
+			})
+			
+			output.find('i').click(function(){
+				output[0].jui2.showPicker();
+				output.find('input').focus()
+			})
+			
+			self.monthPicker = !1
+			self.defaults = defaults
+			output[0].jui2 = self;
+			
+			self[0] = output[0];
+			self.length = 1;
+			
+			jui2.oms.remove(output.attr('id'), 'body')
+			
+			jui2.oms.append(output.attr('id'), function(e){
+				var el = self[0], target = $(e.target), elJui2 = self[0].jui2;
+				
+				0 in target.closest('.j-calendar-select-month') &amp;&amp;
+					(elJui2.monthPicker = !0)
+				|| elJui2.calendar &amp;&amp;
+					0 in target.closest(elJui2.calendar[0]) &amp;&amp;
+						(elJui2.monthPicker = !1)
+				/*if(target.closest('.j-calendar-select-month').length == 1)
+					elJui2.monthPicker = !0
+				else if(elJui2.calendar)
+					if(target.closest(elJui2.calendar[0]).length==1)
+						elJui2.monthPicker = !1*/
+				//if(target.closest(output).length ^ 1 &amp;&amp; elJui2.monthPicker == !1 &amp;&amp; elJui2.calendar &amp;&amp; target.closest(elJui2.calendar[0]).length ^ 1){
+				if(target.closest(output).length ^ 1 &amp;&amp; !elJui2.monthPicker &amp;&amp; elJui2.calendar &amp;&amp; target.closest(elJui2.calendar[0]).length ^ 1){
+					elJui2.calendar.destroy();
+					elJui2.calendar=!1;
+				}
+				//if( output[0].jui2.calendar)
+				if(output[0].jui2.calendar)
+					if(target.closest(output).length == 0 &amp;&amp;  target.closest(output[0].jui2.calendar).length == 0 &amp;&amp;  target.closest('.j-calendar-overlay').length == 0){
+						elJui2.calendar.overlay &amp;&amp;
+							elJui2.calendar.overlay.destroy &amp;&amp;
+								elJui2.calendar.overlay.destroy()
+						elJui2.calendar.destroy();
+						elJui2.calendar=!1;
+					}
+			}, 'body')
+			
+			return self;
+			
+		}
+	}
+	
+	jui2.datePicker = function(opt) {
+        return new datePicker(opt);
+    };
+	
+	jui2.datePicker.fn = datePicker.prototype;
+	
+	jui2.datePicker.fn.disable = function(){
+		
+	}
+	
+	jui2.datePicker.fn.enable = function(){
+		
+	}
+	
+	jui2.datePicker.fn.close = function(){
+		this[0].hide()
+	}
+	
+	jui2.datePicker.fn.val = function(val){
+		if(val)
+			$(this[0]).find('input').val(val)
+		return val || $(this[0]).find('input').val();
+	}
+	
+	jui2.datePicker.fn.reset = function(){
+		$(this[0]).find('input').val('')
+	}
+	
+	jui2.datePicker.fn.destroy = function(){
+		jui2.oms.remove(this[0].attr('id'), 'body')
+		this[0].remove()
+		this[0] = null;
+	}
+	
+	jui2.datePicker.fn.showPicker = function(){
+		var elJui2 = this[0].jui2, $elInput = $(this[0]).find('input'), format = this.defaults.format, defFormat = 'DD-MM-YYYY';
+		if(!elJui2.calendar)
+			elJui2.calendar = jui2.calendar({
+				date: format ? moment($elInput.val(), format).format(defFormat) : $elInput.val(),
+				event:{
+					click: function(cal){
+						$elInput.val(format ? moment(cal.value, defFormat).format(format) : cal.value);
+						cal.destroy();
+						elJui2.calendar = null;
+						$elInput.focus();
+					}
+				}
+			})
+			
+			
+			$(elJui2.calendar[0]).css('z-index', jui2.findHighestZIndex()+1)
+			
+			jui2.pin({
+				element: elJui2.calendar[0],
+				target: $elInput,
+				attachment: 'top left',
+				targetAttachment: 'bottom left'
+			})
+			/*new Tether({
+				element: elJui2.calendar[0],
+				target: $elInput,
+				attachment: 'top left',
+				targetAttachment: 'bottom left',
+				constraints: [{
+					to: 'window',
+					attachment: 'together none',
+					pin: !0
+				}]
+			});*/
+	}
+	
+<span id='jui2-button-property-'>}(jQuery));/****js/widget/loadingMask.js****/
+</span>(function($){
+	jui2.loadingMask = function(target){
+		return jui2.overlay({
+			overlayTarget: target,
+			'class': 'j-background-transparent j-textCenter',
+			content: jui2.tmpl.tmpl_loadingMask(),
+			event: {
+				afterRender: function(self){
+					$(self[0]).find('div').center();//.flexVerticalCenter()
+				}
+			}
+		})
+	}
+<span id='jui2-button-property-'>}(jQuery));/****js/widget/loadingMaskProgress.js****/
+</span>(function($){
+	jui2.loadingMaskProgress = function(target){
+		var self = jui2.overlay({
+			overlayTarget: target,
+			'class': 'j-background-transparent j-textCenter',
+			content: jui2.tmpl.tmpl_loadingMaskProgress({width: '250px'}),
+			event: {
+				afterRender: function(self){
+					$(self[0]).find('div').center();//.flexVerticalCenter()
+				}
+			}
+		})
+		self.setProgress = function(pct){
+			$(self).find('.j-progress-bar div').width(pct+'%')
+		}
+		return self
+	}
+<span id='jui2-button-property-'>}(jQuery));/****js/widget/menu.js****/
+</span>(function($){
+	
+	var menu = function(opt){
+		var self = this, defaults = {id: 'j-no-id'};
+		
+		$.extend(!0, defaults, opt)
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+		
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+		
+			opt = opt || {}
+			var defaults = {
+				id: 'j-'+jui2.random(8, 'aA#'),
+				parent: 'body',
+				menu: []
+			}
+			
+			$.extend(!0, defaults, opt);
+			
+			var output = $(jui2.tmpl.tmpl_menu(defaults));
+
+			0 in target &amp;&amp;  target.replaceWith(output) || $('body').append(output);
+			/*if(target.length &gt; 0){
+				target.replaceWith(output);
+			}
+			else{
+				$('body').append(output);
+			}*/
+			
+			var haveChild = output.find('.j-menu-item').not('[items=&quot;undefined&quot;]')//.siblings()
+			var i = haveChild.length;
+			while(i--){
+				$(haveChild[i]).attr('parent', !0).removeAttr('items');
+				var menu = defaults.menu[$(haveChild[i]).index()].menu;
+				jui2.menu({parent: $(haveChild[i]), menu: menu, child: !0, parentId: defaults.id});
+			}
+			
+			output.hide();
+			
+			output[0].jui2 = self;
+			
+			var targetAttachment = defaults.child ? 'top right' : 'bottom left';
+			/*if(defaults.child){
+				targetAttachment = 'top right';
+			}*/
+			if($('#'+output.attr('id')).length&gt;0){
+				output[0].jui2.tether = jui2.pin({
+					element: output,
+					target: $(defaults.parent),
+					attachment: 'top left',
+					targetAttachment: targetAttachment
+				})
+				/*new Tether({
+					element: output,
+					target: $(defaults.parent),
+					attachment: 'top left',
+					targetAttachment: targetAttachment,
+					constraints: [{
+						to: 'window',
+						attachment: 'together none',
+						pin: !0
+					}]
+				});*/
+			}
+			if(defaults.child){
+				var $jMenuSub = $('.j-menu-'+defaults.parentId)
+				$(defaults.parent).mouseover(function(){
+					$jMenuSub.hide();
+					output[0].jui2.showMenu()
+				}).siblings().not('[parent=true]').mouseover(function(){
+					$jMenuSub.hide();
+				})
+			}
+			
+			self.length = 1;
+			
+			output.click(function(e){
+				var $menu = defaults.menu[$(e.target).closest('.j-menu-item').index()];
+				$menu.event&amp;&amp;$menu.event.click&amp;&amp;$menu.event.click()
+			})
+			
+			jui2.oms.append(output.attr('id'), function(e){
+				var $elMenuItem = $(e.target).closest('.j-menu-item');
+				if(!$(e.target).closest(output).length == 1 &amp;&amp; $(e.target).closest($(defaults.parent)).length == 0){
+					if(!$elMenuItem.attr('parent'))
+						output.hide();
+						output.css('z-index', 0)
+				}
+				else{
+					if(!output.is(':visible'))
+						output[0].jui2.showMenu()
+					else
+						if(!$elMenuItem.attr('parent')){
+							output.hide()
+							output.css('z-index', 0)
+						}
+				}
+			}, 'body')
+			
+			self[0] = output[0];
+			return self;
+			
+		}
+	}
+	
+	jui2.menu = function(opt) {
+        return new menu(opt);
+    };
+	
+	jui2.menu.fn = menu.prototype;
+	
+	jui2.menu.fn.showMenu = function(){
+		var el = $(this[0]), $target = $(this[0].jui2.tether.target), $tetherEl = $(this[0].jui2.tether.element)
+		if(!el.is(':visible'))
+			el.show();
+		if($target.attr('parent')){
+			if($target.parent().position().left+$target.parent().width()+$tetherEl.width()&gt;=$(document).width()){
+				this[0].jui2.tether.setOptions({
+					element: $tetherEl,
+					target: $target,
+					attachment: 'top right',
+					targetAttachment: 'top left'
+				})
+				this[0].jui2.tether.position()
+				/*.setOptions({
+					element: $tetherEl,
+					target: $target,
+					attachment: 'top right',
+					targetAttachment: 'top left',
+					constraints: [{
+						to: 'window',
+						attachment: 'together none',
+						pin: !0
+					}]
+				})*/
+			}
+			else if(this[0].jui2.tether.attachment.left == 'right'){
+				this[0].jui2.tether.setOptions({
+					element: $tetherEl,
+					target: $target,
+					attachment: 'top left',
+					targetAttachment: 'top right'
+				})
+				this[0].jui2.tether.position()
+				/*this[0].jui2.tether.setOptions({
+					element: $tetherEl,
+					target: $target,
+					attachment: 'top left',
+					targetAttachment: 'top right',
+					constraints: [{
+						to: 'window',
+						attachment: 'together none',
+						pin: !0
+					}]
+				})*/
+			}
+		}
+		this[0].jui2.tether.position();
+		el.css('z-index', jui2.findHighestZIndex()+1)
+	}
+	
+<span id='jui2-button-property-'>}(jQuery));/****js/widget/menuButton.js****/
+</span>(function($){
+<span id='jui2-menuButton'>/** JUI2 menu button UI
+</span>	@class jui2.menuButton
+	@extend jui2
+	@param {Object} menuButton options
+	@return {Object} jui2 menuButton object
+	@author Deddy Lasmono Putro
+	@docauthor Deddy Lasmono Putro
+	Example Usage:
+	
+		@example
+		jui2.menuButton({
+			label: 'Menu Button'
+		})
+		
+	To create button with click event, you can add event using javascript like in this example:
+	
+		@example
+		jui2.menuButton({
+			label: 'Menu Button',
+			event: {
+				click: function(menuButton){
+					console.log('Split Button clicked!');
+				}
+			}
+		})
+		
+	This one is the HTML version example:
+	
+		@example
+		&lt;button jui2=&quot;true&quot; role=&quot;menuButton&quot; event=&quot;event&quot;&gt;&lt;/button&gt;
+		&lt;script&gt;
+			var event = {
+				click: function(){
+					console.log('Menu Button clicked!');
+				}
+			}
+			jui2.create()
+		&lt;/script&gt;
+ */
+	var menuButton = function(opt){
+		var self = this;
+		var defaults = {id: 'j-no-id'};
+		
+		$.extend(!0, defaults, opt)
+			
+<span id='jui2-menuButton-cfg-target'>		/**
+</span>			@cfg {selector} target
+			A selector of target element that will be replaced with this UI
+		*/
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+		
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+		
+			opt = opt || {}
+			var defaults = {
+<span id='jui2-menuButton-cfg-id'>				/**
+</span>					@cfg {string} id
+					will be auto generated string if leave blank
+				*/
+				id: 'j-'+jui2.random(8, 'aA#'),
+<span id='jui2-menuButton-cfg-label'>				/**
+</span>					@cfg {string} label
+					Text that will be shown on menu button
+				*/
+				label: '',
+<span id='jui2-menuButton-cfg-icon'>				/**
+</span>					@cfg {string} icon
+					CSS class of icon
+				*/
+				icon: '',
+<span id='jui2-menuButton-cfg-disabled'>				/**
+</span>					@cfg {boolean} disabled
+					True if this menu button disabled
+				*/
+				disabled: !1,
+<span id='jui2-menuButton-cfg-menu'>				/**
+</span>					@cfg {Array} menu
+					Array of menu that will be shown when drop down icon clicked
+				*/
+				menu: []
+			}
+			
+			$.extend(!0, defaults, opt);
+			
+			var output = $(jui2.tmpl.tmpl_menuButton(defaults));
+			
+<span id='jui2-menuButton-cfg-parent'>			/**
+</span>				@cfg {String/HTMLElement/NodeList} parent
+				Parent selector is a element selector wich this UI will be appended if exist
+			*/
+			0 in target &amp;&amp; target.replaceWith(output) || defaults.parent &amp;&amp; $(defaults.parent).append(output) || $('body').append(output);
+			
+			/*if(target.length &gt; 0){
+				target.replaceWith(output);
+			}
+			else if(defaults.parent){
+				$(defaults.parent).append(output)
+			}
+			else{
+				$('body').append(output);
+			}*/
+			jui2.menu({parent: output, menu: defaults.menu});
+			
+			self[0] = output;
+			
+			self[0].jui2 = {}
+			
+			self.length = 1;
+			
+			return self;
+			
+		}
+	}
+	
+	jui2.menuButton = function(opt) {
+        return new menuButton(opt);
+    };
+	
+	jui2.menuButton.fn = menuButton.prototype;
+<span id='jui2-menuButton-method-disable'>	/** @method disable
+</span>		disable enabled menu button UI
+	*/
+	jui2.menuButton.fn.disable = function(){
+		var el = this[0]
+		if(!el.hasClass('j-disabled')){
+			el.addClass('j-disabled');
+			if(el.data().events){
+				el.data().events._click = el.data().events.click;
+				el.data().events.click = null;
+			}
+		}
+	}
+<span id='jui2-menuButton-method-enable'>	/** @method enable
+</span>		enable disabled menu button UI
+	*/
+	jui2.menuButton.fn.enable = function(){
+		var el = this[0]
+		if(el.hasClass('j-disabled')){
+			el.removeClass('j-disabled');
+			if(el.data().events){
+				el.data().events.click = el.data().events._click;
+				el.data().events._click = null;
+			}
+		}
+	}
+<span id='jui2-menuButton-method-destroy'>	/** @method destroy
+</span>		destroy menu button UI
+	*/
+	jui2.menuButton.fn.destroy = function(){
+		$(this[0]).remove()
+		this[0] = null;
+	}
+	
+<span id='jui2-menuButton-property-'>}(jQuery));/****js/widget/modal.js****/
+</span>(function($){
+	
+	var modal = function(opt){
+		var defaults = {id: 'j-no-id'}, self = this;
+		
+		$.extend(!0, defaults, opt)
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+		
+			opt = opt || {}
+			var defaults = {
+				id: 'j-'+jui2.random(8, 'aA#'),
+				content: '',
+				event: {}
+			}
+			
+			$.extend(!0, defaults, opt);
+			
+			var content = jui2.tmpl.tmpl_modal(defaults);
+			
+			/*jui2.bar({
+				parent: content.find('.j-modal-top-toolbar'),
+				items:['-', {
+					role: 'button',
+					icon: 'fa-times',
+					event: {
+						click: function(){
+							console.log('close');
+						}
+					}
+				}]
+			})*/
+			
+			var output = jui2.overlay({
+				event: defaults.event,
+				overlayTarget: 'body',
+				'class': 'j-background-transparent j-modal-overlay',
+				id: defaults.id,
+				content: content
+			})
+			
+			jui2.bar({
+				parent: $(output[0]).find('.j-modal-top-toolbar'),
+				items:[{
+					text: defaults.title
+				},'-', {
+					role: 'button',
+					icon: 'fa-times',
+					event: {
+						click: function(){
+							self.destroy()
+						}
+					}
+				}]
+			})
+			
+			/*Midway()
+			Midway()*/
+			
+			$(output[0]).children().center();
+			
+			drag($(output[0]).find('.j-modal')[0]).handle($(output[0]).find('.j-modal-top-toolbar')[0]).bind();
+			
+			//self.loadingMask = jui2.loadingMask($(output[0]))
+			
+			$.ajax({
+				url: defaults.content
+			}).done(function(content){
+				$(output[0]).find('.j-modal-content').append(content)
+				$(output[0]).children().center();
+				//self.loadingMask.destroy()
+			})
+			//setTimeout(function(){Midway();console.log('asd')}, 2000)
+			
+			/*if(target.length &gt; 0){
+				target.replaceWith(output);
+			}
+			else if(defaults.parent){
+				$(defaults.parent).append(output)
+			}
+			else{
+				$('body').append(output);
+			}*/
+			
+			output[0].jui2 = self;
+
+			self[0] = output[0];
+			self.length = 1;
+	
+			return self;
+			
+		}
+	}
+	
+	jui2.modal = function(opt) {
+        return new modal(opt);
+    };
+	
+	jui2.modal.fn = modal.prototype;
+	
+	jui2.modal.fn.disable = function(){
+		
+	}
+	
+	jui2.modal.fn.enable = function(){
+		
+	}
+	
+	jui2.modal.fn.close = function(){
+		$(this[0]).hide()
+	}
+	
+	jui2.modal.fn.destroy = function(){
+		this[0].remove()
+		this[0] = null;
+	}
+	
+<span id='jui2-menuButton-property-'>}(jQuery));/****js/widget/monthPicker.js****/
+</span>(function($){
+	
+	var monthPicker = function(opt){
+		var defaults = {id: 'j-no-id'}, self = this;
+		
+		$.extend(!0, defaults, opt)
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+		
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+		
+			opt = opt || {}
+			var defaults = {
+				id: 'j-'+jui2.random(8, 'aA#'),
+				disabled: !1,
+				event: {},
+				parent: 'body',
+				lang: 'en',
+				month: moment().format('MM')
+			}
+			
+			$.extend(!0, defaults, opt);
+			
+			defaults.monthsName = jui2.lang.monthPicker[defaults.lang];
+			
+			var output = $(jui2.tmpl.tmpl_monthPicker(defaults));
+			
+			
+			0 in target &amp;&amp; target.replaceWith(output) || defaults.parent &amp;&amp; $(defaults.parent).append(output) || $('body').append(output);
+			
+			/*if(target.length &gt; 0){
+				target.replaceWith(output);
+			}
+			else if(defaults.parent){
+				$(defaults.parent).append(output)
+			}
+			else{
+				$('body').append(output);
+			}*/
+			
+			output.find('tbody td:contains('+jui2.lang.monthPicker[defaults.lang][moment(defaults.month+'-2000', 'MM-YYYY').format('MMM').toLowerCase()].short+')').addClass('j-monthPicker-selected')
+			
+			self[0] = output;
+			self.length = 1;
+			output[0].jui2 = self;
+			self.value=defaults.month;
+			
+			output.find('tbody td').click(function(){
+				var index = $(this).index(), $el = $(this), clsSel = 'j-monthPicker-selected';
+				
+				index == 1 &amp;&amp; (index = 6)
+				/*if(index==1){
+					index=6;
+				}*/
+				output[0].jui2.value = $el.parent().index()+1+index;
+				output.find('tbody td').removeClass(clsSel);
+				$el.addClass(clsSel);
+			})
+			
+			return self;
+			
+		}
+	}
+	
+	jui2.monthPicker = function(opt) {
+        return new monthPicker(opt);
+    };
+	
+	jui2.monthPicker.fn = monthPicker.prototype;
+	
+	jui2.monthPicker.fn.disable = function(){
+		var el = this[0]
+		if(!el.hasClass('j-disabled')){
+			el.addClass('j-disabled');
+			if(el .data().events){
+				el .data().events._click = el .data().events.click;
+				el .data().events.click = null;
+			}
+		}
+	}
+	
+	jui2.monthPicker.fn.enable = function(){
+		var el = this[0]
+		if(el.hasClass('j-disabled')){
+			el.removeClass('j-disabled');
+			if(el .data().events){
+				el .data().events.click = el .data().events._click;
+				el .data().events._click = null;
+			}
+		}
+	}
+	
+	jui2.monthPicker.fn.close = function(){
+		this[0].hide()
+	}
+	
+	jui2.monthPicker.fn.destroy = function(){
+		this[0].remove()
+	}
+	
+<span id='jui2-menuButton-property-'>}(jQuery));/****js/widget/overlay.js****/
+</span>(function($){
+	
+	var overlay = function(opt){
+		var defaults = {id: 'j-no-id'}, self = this;
+		
+		$.extend(!0, defaults, opt)
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+		
+			opt = opt || {}
+			var defaults = {
+				id: 'j-'+jui2.random(8, 'aA#'),
+				disabled: !1,
+				event: {},
+				overlayTarget: 'body'
+			}
+			
+			$.extend(!0, defaults, opt);
+			
+			defaults.top = defaults.top || $(defaults.overlayTarget).offset().top
+			/*if(!defaults.top)
+				defaults.top = $(defaults.overlayTarget).position().top*/
+			
+			defaults.left = defaults.left || $(defaults.overlayTarget).offset().left
+			/*if(!defaults.left)
+				defaults.left = $(defaults.overlayTarget).position().left*/
+			
+			defaults.width = defaults.width || $(defaults.overlayTarget).width()
+			/*if(!defaults.width)
+				defaults.width = $(defaults.overlayTarget).width()*/
+			
+			defaults.height = defaults.height || $(defaults.overlayTarget).height()
+			/*if(!defaults.height)
+				defaults.height = $(defaults.overlayTarget).height()*/
+
+			var output = $(jui2.tmpl.tmpl_overlay(defaults));
+			
+			$('body').append(output);
+			
+			output.css('z-index', jui2.findHighestZIndex()+1)
+			
+			output[0].jui2 = this;
+			self[0] = output[0];
+			self.length = 1;
+			
+			defaults.event.afterRender &amp;&amp; defaults.event.afterRender(this)
+			/*if(defaults.event.afterRender){
+				defaults.event.afterRender(this);
+			}*/
+			
+			output.children('.j-modal').center()
+			
+			return self;
+			
+		}
+	}
+	
+	jui2.overlay = function(opt) {
+        return new overlay(opt);
+    };
+	
+	jui2.overlay.fn = overlay.prototype;
+	
+	jui2.overlay.fn.disable = function(){
+		
+	}
+	
+	jui2.overlay.fn.enable = function(){
+		
+	}
+	
+	jui2.overlay.fn.close = function(){
+		this[0].hide()
+	}
+	
+	jui2.overlay.fn.destroy = function(){
+		this[0].remove()
+		this[0] = null;
+	}
+	
+	jui2.overlay.fn.center = function(){
+		$(self[0]).children('.j-modal').center()
+	}
+	
+<span id='jui2-menuButton-property-'>}(jQuery));/****js/widget/panel.js****/
+</span><span id='jui2-menuButton-property-'>;/****js/widget/passwordField.js****/
+</span>(function($){
+	
+	var passwordField = function(opt){
+		var defaults = {id: 'j-no-id'}, self = this;
+		
+		$.extend(!0, defaults, opt)
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+		
+			opt = opt || {}
+			var defaults = {
+				id: 'j-'+jui2.random(8, 'aA#'),
+				disabled: !1,
+				event: {}
+			}
+			
+			$.extend(!0, defaults, opt);
+			
+			var output = $(jui2.tmpl.tmpl_passwordField(defaults));
+			
+			0 in target &amp;&amp; target.replaceWith(output) || defaults.parent &amp;&amp; $(defaults.parent).append(output) || $('body').append(output);
+			
+			/*if(target.length &gt; 0){
+				target.replaceWith(output);
+			}
+			else if(defaults.parent){
+				$(defaults.parent).append(output)
+			}
+			else{
+				$('body').append(output);
+			}*/
+			
+			output[0].jui2 = self;
+			self[0] = output[0];
+			self.length = 1;
+		
+			return self;
+			
+		}
+	}
+	
+	jui2.passwordField = function(opt) {
+        return new passwordField(opt);
+    };
+	
+	jui2.passwordField.fn = passwordField.prototype;
+	
+	jui2.passwordField.fn.val = function(val){
+		if(val)
+			$(this[0]).find('input').val(val)
+		return val || $(this[0]).find('input').val();
+	}
+	
+	jui2.passwordField.fn.reset = function(){
+		$(this[0]).find('input').val('')
+	}
+	
+	jui2.passwordField.fn.disable = function(){
+		
+	}
+	
+	jui2.passwordField.fn.enable = function(){
+		
+	}
+	
+	jui2.passwordField.fn.close = function(){
+		this[0].hide()
+	}
+	
+	jui2.passwordField.fn.destroy = function(){
+		this[0].remove()
+		this[0] = null;
+	}
+	
+<span id='jui2-menuButton-property-'>}(jQuery));/****js/widget/radio.js****/
+</span>(function($){
+	
+	var radioField = function(opt){
+		var defaults = {id: 'j-no-id'}, self = this;
+		
+		$.extend(!0, defaults, opt)
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+		
+			opt = opt || {}
+			var rand = jui2.random(8, 'aA#');
+			var defaults = {
+				id: 'j-'+rand,
+				name: 'j-'+rand,
+				disabled: !1,
+				items: []
+			}
+			
+			$.extend(!0, defaults, opt);
+			for(var i=defaults.items.length;i--;)
+				defaults.items[i].id = 'j-'+jui2.random(8, 'aA#')
+			/*for(var i = 0;i&lt;defaults.items.length;i++){
+				defaults.items[i].id = 'j-'+jui2.random(8, 'aA#')
+			}*/
+			
+			var output = $(jui2.tmpl.tmpl_radioField(defaults));
+			
+			0 in target &amp;&amp; target.replaceWith(output) || defaults.parent &amp;&amp; $(defaults.parent).append(output) || $('body').append(output);
+			
+			/*if(target.length &gt; 0){
+				target.replaceWith(output);
+			}
+			else if(defaults.parent){
+				$(defaults.parent).append(output)
+			}
+			else{
+				$('body').append(output);
+			}*/
+			
+			output[0].jui2 = self;
+			self[0] = output[0];
+			self.length = 1;
+		
+			return self;
+			
+		}
+	}
+	
+	jui2.radioField = function(opt) {
+        return new radioField(opt);
+    };
+	
+	jui2.radioField.fn = radioField.prototype;
+	
+	jui2.radioField.fn.disable = function(){
+		
+	}
+	
+	jui2.radioField.fn.enable = function(){
+		
+	}
+	
+	jui2.radioField.fn.close = function(){
+		this[0].hide()
+	}
+	
+	jui2.radioField.fn.val = function(value){
+		if(value)
+			$('[value='+value+']').attr('checked', 'checked')
+		return $(this[0]).find('input:checked').val();
+	}
+	
+	jui2.radioField.fn.destroy = function(){
+		this[0].remove()
+		this[0] = null;
+	}
+	
+<span id='jui2-menuButton-property-'>}(jQuery));/****js/widget/rightMenu.js****/
+</span>(function($){
+	
+	var rightMenu = function(opt){
+		var defaults = {id: 'j-no-id'}, self = this;
+		
+		$.extend(!0, defaults, opt)
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+		
+			opt = opt || {}
+			var defaults = {
+				id: 'j-'+jui2.random(8, 'aA#'),
+				disabled: !1,
+				event: {},
+				rightMenuTarget: 'body',
+				class: 'j-right-menu'
+			}
+			
+			$.extend(!0, defaults, opt);
+
+			var output = $(jui2.tmpl.tmpl_menu(defaults));
+			
+			$(defaults.rightMenuTarget).append(output).bind('mousedown', function(e) {
+				e = e || window.event;
+				switch (e.which) {
+					case 3:
+						if(defaults.event.beforeshow){
+							defaults.event.beforeshow(self, e)
+						}
+						$('.j-right-menu').hide()
+						$(self[0]).show().offset({ top: e.pageY, left: e.pageX})
+					break; 
+				}
+			}).bind('contextmenu', function(){
+				return false;
+			});
+			
+			$(defaults.rightMenuTarget).click(function(e){
+				if($(e.target).hasClass('j-tree-head')){
+					var $menu = defaults.menu[$(e.target).closest('.j-menu-item').index()];
+					if($menu)
+						$menu.event&amp;&amp;$menu.event.click&amp;&amp;$menu.event.click()
+					$(e.target).parents('.j-right-menu').hide();
+				}
+			})
+			
+			output.hide();
+			
+			output.css('z-index', jui2.findHighestZIndex()+1)
+			
+			output[0].jui2 = this;
+			self[0] = output[0];
+			self.length = 1;
+			self.defaults = defaults
+			self.output = output
+			
+			return self;
+			
+		}
+	}
+	
+	jui2.rightMenu = function(opt) {
+        return new rightMenu(opt);
+    };
+	
+	jui2.rightMenu.fn = rightMenu.prototype;
+	
+	jui2.rightMenu.fn.disable = function(){
+		
+	}
+	
+	jui2.rightMenu.fn.enable = function(){
+		
+	}
+	
+	jui2.rightMenu.fn.close = function(){
+		this[0].hide()
+	}
+	
+	jui2.rightMenu.fn.destroy = function(){
+		this[0].remove()
+		this[0] = null;
+	}
+	
+	jui2.rightMenu.fn.center = function(){
+		$(self[0]).children('.j-modal').center()
+	}
+	
+	jui2.rightMenu.fn.items = function(menu){
+		var self = this
+		self.defaults.menu = menu
+		self[0].remove();
+		self.output = $(jui2.tmpl.tmpl_menu(self.defaults));
+		$(self.defaults.rightMenuTarget).append(self.output)
+		
+		$(self.defaults.rightMenuTarget).click(function(e){
+			var $menu = self.defaults.menu[$(e.target).closest('.j-menu-item').index()];
+			$menu.event&amp;&amp;$menu.event.click&amp;&amp;$menu.event.click()
+			$(e.target).parents('.j-right-menu').hide();
+		})
+		
+		self.output.css('z-index', jui2.findHighestZIndex()+1)
+		self.output[0].jui2 = this;
+		self[0] = self.output[0]
+	}
+	
+<span id='jui2-menuButton-property-'>}(jQuery));/****js/widget/spacer.js****/
+</span>(function($){
+	
+	var spacer = function(opt){
+		var defaults = {id: 'j-no-id'}, self = this;
+		
+		$.extend(!0, defaults, opt)
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+		
+		if(target.hasClass('j-body')){
+		
+			self[0] = target;
+			self.length = 1;
+			
+			return self;
+		}
+		else{
+		
+			opt = opt || {}
+			var defaults = {
+				id: 'j-'+jui2.random(8, 'aA#'),
+				disabled: !1,
+				event: {}
+			}
+			
+			$.extend(!0, defaults, opt);
+			
+			var output = $(jui2.tmpl.tmpl_spacer(defaults));
+			
+			0 in target &amp;&amp; target.replaceWith(output) || defaults.parent &amp;&amp; $(defaults.parent).append(output) || $('body').append(output);
+			
+			/*if(target.length &gt; 0){
+				target.replaceWith(output);
+			}
+			else if(defaults.parent){
+				$(defaults.parent).append(output)
+			}
+			else{
+				$('body').append(output);
+			}*/
+			
+			self[0] = output;
+			self.length = 1;
+			
+			return self;
+			
+		}
+	}
+	
+	jui2.spacer = function(opt) {
+        return new spacer(opt);
+    };
+	
+	jui2.spacer.fn = spacer.prototype;
+	
+<span id='jui2-menuButton-property-'>}(jQuery));/****js/widget/splitButton.js****/
+</span>(function($){
+<span id='jui2-splitButton'>/** JUI2 button UI
+</span>	@class jui2.splitButton
+	@extend jui2
+	@param {Object} splitButton options
+	@return {Object} jui2 splitButton object
+	@author Deddy Lasmono Putro
+	@docauthor Deddy Lasmono Putro
+	Example Usage:
+	
+		@example
+		jui2.splitButton({
+			label: 'Split Button'
+		})
+		
+	To create button with click event, you can add event using javascript like in this example:
+	
+		@example
+		jui2.splitButton({
+			label: 'Split Button',
+			event: {
+				click: function(splitButton){
+					console.log('Split Button clicked!');
+				}
+			}
+		})
+		
+	This one is the HTML version example:
+	
+		@example
+		&lt;button jui2=&quot;true&quot; role=&quot;splitButton&quot; event=&quot;event&quot;&gt;&lt;/button&gt;
+		&lt;script&gt;
+			var event = {
+				click: function(){
+					console.log('Split Button clicked!');
+				}
+			}
+			jui2.create()
+		&lt;/script&gt;
+ */
+	var splitButton = function(opt){
+		var self = this, defaults = {id: 'j-no-id'};
+		
+		$.extend(!0, defaults, opt)
+			
+<span id='jui2-splitButton-cfg-target'>		/**
+</span>			@cfg {selector} target
+			A selector of target element that will be replaced with this UI
+		*/
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+		
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+		
+			opt = opt || {}
+			var defaults = {
+<span id='jui2-splitButton-cfg-id'>				/**
+</span>					@cfg {string} id
+					will be auto generated string if leave blank
+				*/
+				id: 'j-'+jui2.random(8, 'aA#'),
+<span id='jui2-splitButton-cfg-label'>				/**
+</span>					@cfg {string} label
+					Text that will be shown on split button
+				*/
+				label: '',
+<span id='jui2-splitButton-cfg-icon'>				/**
+</span>					@cfg {string} icon
+					CSS class of icon
+				*/
+				icon: '',
+<span id='jui2-splitButton-cfg-disabled'>				/**
+</span>					@cfg {boolean} disabled
+					True if this split button disabled
+				*/
+				disabled: !1,
+<span id='jui2-splitButton-cfg-menu'>				/**
+</span>					@cfg {Array} menu
+					Array of menu that will be shown when drop down icon clicked
+				*/
+				menu: [],
+<span id='jui2-splitButton-cfg-event'>				/**
+</span>					@cfg {Object} event
+					@cfg {Function} event.click
+					@param {object} JUI2 splitButton UI object
+					Click event that fired when UI is clicked on
+				*/
+				event: {}
+			}
+			
+			$.extend(!0, defaults, opt);
+			
+			var output = $(jui2.tmpl.tmpl_splitButton(defaults));
+			
+<span id='jui2-splitButton-cfg-parent'>			/**
+</span>				@cfg {String/HTMLElement/NodeList} parent
+				Parent selector is a element selector wich this UI will be appended if exist
+			*/
+			0 in target &amp;&amp; target.replaceWith(output) || defaults.parent &amp;&amp; $(defaults.parent).append(output) || $('body').append(output);
+			
+			/*if(target.length &gt; 0){
+				target.replaceWith(output);
+			}
+			else if(defaults.parent){
+				$(defaults.parent).append(output)
+			}
+			else{
+				$('body').append(output);
+			}*/
+			
+			jui2.menu({parent: output.find('i')[1], menu: defaults.menu});
+			
+			self[0] = output;
+			
+			self[0].jui2 = {}
+			
+			self.length = 1;
+			
+			if(typeof defaults.event.click == 'function')
+				output.find('i').last().siblings().click(defaults.event.click);
+			
+			return self;
+			
+		}
+	}
+	
+	jui2.splitButton = function(opt) {
+        return new splitButton(opt);
+    };
+	
+	jui2.splitButton.fn = splitButton.prototype;
+<span id='jui2-splitButton-method-disable'>	/** @method disable
+</span>		disable enabled split button UI
+	*/
+	jui2.splitButton.fn.disable = function(){
+		var el = this[0]
+		if(!el.hasClass('j-disabled')){
+			el.addClass('j-disabled');
+			if(el.data().events){
+				el.data().events._click = el.data().events.click;
+				el.data().events.click = null;
+			}
+		}
+	}
+<span id='jui2-splitButton-method-enable'>	/** @method enable
+</span>		enable disabled split button UI
+	*/
+	jui2.splitButton.fn.enable = function(){
+		var el = this[0]
+		if(el.hasClass('j-disabled')){
+			el.removeClass('j-disabled');
+			if(el.data().events){
+				el.data().events.click = el.data().events._click;
+				el.data().events._click = null;
+			}
+		}
+	}
+<span id='jui2-splitButton-method-destroy'>	/** @method destroy
+</span>		destroy split button UI
+	*/
+	jui2.splitButton.fn.destroy = function(){
+		$(this[0]).remove()
+		this[0] = null;
+	}
+	
+<span id='jui2-splitButton-property-'>}(jQuery));/****js/widget/table.js****/
+</span>(function($){
+	
+	var table = function(opt){
+		var defaults = {id: 'j-no-id'}, self = this;
+		$.extend(!0, defaults, opt)
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+			/*opt = opt || {}*/
+			opt = opt || {}
+			var defaults = {
+				id: 'j-'+jui2.random(8, 'aA#'),
+				disabled: !1,
+				event: {},
+				width: 'auto',
+				columns: [],
+				server: !1,
+				hidden:[],
+				custom:!1,
+				drop: [],
+				preview: '',
+				previewurl: '',
+				editable: {},
+				vr: ''
+			}
+			
+			$.extend(!0, defaults, opt);
+			
+			var output = $(jui2.tmpl.tmpl_table(defaults));
+			
+			var jTableHead = output.children('.j-table-head'), jTableBody = output.children('.j-table-body')
+			
+			output[0].jui2 = self;
+			self[0] = output[0];
+			self.length = 1;
+			output[0].jui2.defaults = defaults
+			
+			0 in target &amp;&amp; target.replaceWith(output) || defaults.parent &amp;&amp; $(defaults.parent).append(output) || $('body').append(output);
+			
+			/*if(target.length &gt; 0){
+				target.replaceWith(output);
+			}
+			else if(defaults.parent){
+				$(defaults.parent).append(output)
+			}
+			else{
+				$('body').append(output);
+			}*/
+			
+			if(defaults.title &amp;&amp; defaults.title!='')
+				jui2.bar({
+					parent: output.find('.j-table-top-toolbar'),
+					items:[{
+						text: defaults.title
+					}]
+				});
+			
+			if(defaults.topbar)
+				jui2.bar({
+					parent: output.find('.j-table-top-toolbar'),
+					'class': 'j-color-toolbar-white',
+					items: defaults.topbar
+				});
+			
+			var jui2Param = output[0].jui2.param = {}
+			if(typeof defaults.data == 'string'){
+				jui2.bar({
+					parent: $(self[0]).find('.j-table-bottom-toolbar'),
+					class: 'j-status-bar',
+					items:[{
+						role: 'button',
+						label: 'Prev',
+						event: {
+							click: function(){
+								var param = self.param;
+								//if(param.totalPage&gt;((+param.iDisplayLength)+(+param.iDisplayStart)))
+								if((param.iDisplayStart/param.iDisplayLength+1)&gt;1)
+									param.iDisplayStart = (+param.iDisplayStart)-(+param.iDisplayLength)
+								if(param.iDisplayStart&lt;0)
+									param.iDisplayStart = 0
+								self.generateData();
+							}
+						}
+					}, {
+						role: 'button',
+						label: 'Next',
+						event: {
+							click: function(){
+								var param = self.param;
+								if((param.iDisplayStart/param.iDisplayLength+1)&lt;-~(param.iTotalRecords/param.iDisplayLength))
+									param.iDisplayStart = (+param.iDisplayStart)+(+param.iDisplayLength)
+								self.generateData();
+							}
+						}
+					}, {
+						role: 'button',
+						icon: 'fa-refresh',
+						class: 'j-table-refresh',
+						event: {
+							click: function(){
+								self.generateData();
+							}
+						}
+					}, '-', {
+						text: '',
+						class: 'j-table-pageOf'
+					}]
+				});
+				jui2Param.sEcho = -1
+				jui2Param.iDisplayLength = 10
+				jui2Param.iDisplayStart = 0
+				jui2Param.iSortCol_0 = 0
+				jui2Param.sSearch = ''
+				jui2Param.sSortDir_0 = ''
+				output[0].jui2.generateData()
+			}
+			else{
+				var data = $(jui2.tmpl.tmpl_tableData({data: defaults.data, columns: defaults.columns/*, class: output.attr('id')*/}));
+				jTableBody.empty().append(data);
+				
+				var maxWidth = 0;
+				output.find('.j-table-head tbody td').each(function(i, val){
+					jTableBody.children('table').children('colgroup:nth-child('+(i+1)+')').children('col').width($(val).outerWidth(!0))
+					maxWidth += parseFloat($(val).outerWidth(!0));
+				})
+				self.resizeTable();
+				jTableBody.children('table').width(maxWidth);
+			}
+			
+			if(defaults.event.afterRender)
+				defaults.event.afterRender(this)
+			
+			//add scroll event
+			/*var controller = new ScrollMagic({
+					container : output.children('.j-table-body'),
+					vertical : !1
+				});*/
+			/*var scene = new ScrollScene({
+					//triggerElement : output.children('.j-table-body').children('table'),
+					duration : 200
+				}).addTo(controller).on(&quot;update&quot;, function (e) {
+					jTableHead.scrollLeft(e.scrollPos)
+				});*/
+			jTableBody.scroll(function() {
+				jTableHead.scrollLeft(this.scrollLeft)
+			});
+				
+			output.find('.j-table-head thead td .j-table-header-menu').each(function(i, val){
+				var td = $($(this).parents('td')[0]), el = $(this), startX=0, scrollLeft = 0, tableRuler = output.children('.j-table-ruler');
+				drag(this).axis('x').handle($(this).children('.j-table-header-resize')[0]).dragging(function() {
+					//td.width(td.width()+(this.pos.x-startX))
+					tableRuler.css('left', (td.position().left+this.pos.x+output.position().left+13))
+					el.show()
+					//startX = this.pos.x;
+				}).start(function() {
+					tableRuler.height(output.height()).show().css('left', (output.position().left+td.position().left+el.position().left+13/*-output.children('.j-table-head').scrollLeft()*/))
+					startX = parseFloat(tableRuler.css('left'));
+					scrollLeft = jTableHead.scrollLeft()
+				}).end(function() {
+					el.css('left', '');
+					$(td.parents('table')[0]).width(parseFloat($(td.parents('table')[0]).width()) + (parseFloat(tableRuler.css('left'))-startX))
+					var width = td.width()+(parseFloat(tableRuler.css('left'))-startX);
+					td.width(width).children('div').width(width)
+					output[0].jui2.resizeTable()
+					jTableHead.scrollLeft(scrollLeft)
+					jTableBody.scrollLeft(scrollLeft)
+					tableRuler.hide()
+				}).bind();
+			})
+			
+			return self;
+			
+		}
+	}
+	
+	jui2.table = function(opt) {
+        return new table(opt);
+    };
+	
+	jui2.table.fn = table.prototype;
+	
+	jui2.table.fn.disable = function(){
+		
+	}
+	
+	jui2.table.fn.enable = function(){
+		
+	}
+	
+	jui2.table.fn.close = function(){
+		this[0].hide()
+	}
+	
+	jui2.table.fn.destroy = function(){
+		this[0].remove()
+		this[0] = null;
+	}
+	
+	jui2.table.fn.resizeTable = function(){
+		var self = this;
+		var maxWidth = 0;
+		var $jTableBodyTable = $(self[0]).children('.j-table-body').children('table')
+		
+		$(self[0]).find('.j-table-head tbody td').each(function(i, val){
+			var $col = $jTableBodyTable.children('colgroup:nth-child('+(i+1)+')').children('col'), outerWidth = $(val).outerWidth(!0)
+			if($(val).hasClass('j-table-last-td')){
+				/*var width = 0;
+				if($(val).outerWidth(!0)&gt;=20)*/
+				var width = outerWidth&gt;=20 ? parseFloat(outerWidth)-20 : 0;
+				$col.width(width)
+				maxWidth += width;
+			}
+			else{
+				$col.width(outerWidth)
+				maxWidth += parseFloat(outerWidth);
+			}
+		})
+		
+		//if(parseFloat(maxWidth)&gt;parseFloat($(self[0]).children('.j-table-body').children('table').width()))
+		$jTableBodyTable.width(maxWidth);
+	}
+	
+	jui2.table.fn.generateData = function(data){
+		var self = this, $self = $(this[0]), param = self.param, defaults = self.defaults, $jTableBody = $self.children('.j-table-body')
+		if(data){
+			var data = $(jui2.tmpl.tmpl_tableData({data: data, columns: defaults.columns, colCount: defaults.colCount, id: $self.attr('id'), drop: defaults.drop}));
+			$jTableBody.empty().append(data);
+			self.resizeTable();
+			if(defaults.event.afterdraw){
+				defaults.event.afterdraw(self)
+			}
+		}
+		else{
+			self.loadingMask = jui2.loadingMask(self[0])
+			self.param.sEcho++;
+			$.getJSON(defaults.data, param).done(function(data){
+				if(param.sEcho==data.sEcho){
+					defaults.items = new Array();
+					param.totalPage = (+data.iTotalRecords)-1;
+					
+					jui2.clearNullFromJson(data.aaData);
+					
+					data.aaData = jui2.arrayToJson(data.aaData);
+					self.aaData = TAFFY(data.aaData)
+					for(i in data){
+						if(i!='aaData'){
+							param[i] = data[i]
+						}
+					}
+					/*$.each(data, function(i, val){
+						console.log(i);
+						if(i^'aaData')
+							param[i] = val
+					})*/
+					
+					var dataToBeShowed = [], tmpdataToBeShowed = []
+					$.extend(!0, dataToBeShowed, (defaults.server == !0) ? self.aaData().start(0).limit(param.iDisplayLength).get() : self.aaData().start(param.iDisplayStart).limit(param.iDisplayLength).get());
+					//var dataToBeShowed = (defaults.server == !0) ? self.aaData().start(0).limit(param.iDisplayLength).get() : self.aaData().start(param.iDisplayStart).limit(param.iDisplayLength).get();
+					$.extend(!0, tmpdataToBeShowed, dataToBeShowed)
+					if(defaults.custom)
+						for(var i=0;i&lt;dataToBeShowed.length;i++){
+							for(j in defaults.custom){
+								tmpdataToBeShowed[i][j] = defaults.custom[j](dataToBeShowed[i])
+							}
+							/*$.each(defaults.custom, function(j, val){
+								console.log(j);
+								dataToBeShowed[i][j] = defaults.custom[j](dataToBeShowed[i])
+							})*/
+						}
+					
+					var preview = defaults.preview != '' ? !0 : !1
+					/*if(defaults.preview != '')
+						preview = !0*/
+					var previewurl = defaults.previewurl != '' ? defaults.previewurl : !1
+					/*if(defaults.previewurl != '')
+						previewurl = defaults.previewurl*/
+					var data = $(jui2.tmpl.tmpl_tableData({preview: preview, previewurl: previewurl, id: $self.attr('id'),data: tmpdataToBeShowed, colCount: defaults.colCount, drop: defaults.drop})).width('100%');
+					$jTableBody.empty().append(data);
+					
+					jui2.create(defaults.vr.substring(1))
+					
+					$jTableBody.children().children().children('tr').children('td').bind('dblclick', function(e){
+						var $el = $(this), index = $(this).index(), $parent = $el.parent();
+						if(defaults.editable[index]){
+							$parent[0].defaultInnerHTML = $parent.children().clone(!0);
+							var colspan = $parent.children().length-1
+							var element = typeof defaults.editable[index] == 'function' ? defaults.editable[index](self.aaData({___id: $(this).parent().attr('pk')}).get()[0]) : defaults.editable[index]
+
+							$parent.empty().append('&lt;td&gt;&lt;/td&gt;&lt;td colspan=&quot;'+colspan+'&quot;&gt;&lt;div&gt;'+element+'&lt;/div&gt;&lt;/td&gt;')
+							jui2.button({
+								label: 'Save',
+								event: {
+									click: function(){
+										var data = $($parent).jui2Serialize();
+										for(i in data){
+											value = data[i]
+										}
+										/*$.each(data, function(i, val){
+											value = val
+										})*/
+										defaults.save(value, index, self.aaData({___id: $parent.attr('pk')}).get()[0]);
+										//self.aaData({___id: $parent.attr('pk')}).get()[0][index]=value;
+										//$parent.empty().empty().append($parent[0].defaultInnerHTML)
+									}
+								},
+								parent: $parent.children().children()[0]
+							});
+							jui2.button({
+								label: 'Cancel',
+								event: {
+									click: function(){
+										$parent.empty().empty().append($parent[0].defaultInnerHTML)
+									}
+								},
+								parent: $parent.children().children()[0]
+							});
+							jui2.create(defaults.vr.substring(1))
+						}
+						/*var $el = $(this), index = $(this).index();
+						if(defaults.editable[index]){
+							if(typeof defaults.editable[index] == 'string'){
+								this.defaultInnerHTML = $el.children().clone(true);
+								$el.empty().append(defaults.editable[index]);
+								jui2.create(defaults.vr.substring(1))
+							}
+						}*/
+						//if(defaults.editable[]
+					})
+					
+					$jTableBody.children().children().children('tr').bind('click', function(){
+						var $this = $(this), $radio = $this.find('[type=radio]'), cls = 'j-table-active'
+						$this.addClass(cls).siblings().removeClass(cls);
+						0 in $radio &amp;&amp; ($radio[0].checked = !0)
+						
+						$self.children('.j-table-preview').empty();
+						/*if(defaults.preview!=''){
+							$self.children('.j-table-body').children('.j-table-preview').append(defaults.preview(self.aaData({0: pk}).get()))
+						}*/
+					})
+					self.resizeTable();
+					$self.children('.j-table-bottom-toolbar').find('.j-table-pageOf').text('Page '+(param.iDisplayStart/param.iDisplayLength+1)+' of '+-~(param.iTotalRecords/param.iDisplayLength))
+					
+					if(defaults.event.afterdraw){
+						defaults.event.afterdraw(self)
+					}
+				}
+			}).always(function(){
+				self.loadingMask.destroy()
+			})
+		}
+	}
+	
+	jui2.table.fn.preview = function(pk, style){
+		var self = this, $self = $(this[0]), defaults = self.defaults, $preview = $self.children('.j-table-preview'), $tableBody = $self.children('.j-table-body');
+		$preview.empty().append('&lt;div style=&quot;padding: 3px;padding-top: 10px;position: relative&quot;&gt;&lt;i class=&quot;fa fa-times&quot; style=&quot;position:absolute;top:3px;right:3px;cursor:pointer&quot;&gt;&lt;/i&gt;'+defaults.preview(self.aaData({___id: pk}).get())+'&lt;/div&gt;').css({'top': $self.children('.j-table-body').position().top, height: $self.children('.j-table-body').height()})
+		$self.find('.j-table-preview .fa-times').bind('click', function(){
+			$preview.empty();
+		})
+		var min = $tableBody.hasScrollBarHor() ? 20 : 0;
+		/*if($tableBody.hasScrollBarHor()){
+			$preview.css('height', $preview.height()-20)
+		}
+		else{
+			$preview.css('height', $preview.height())
+		}*/
+		
+		$preview.css('height', $preview.height() - min)
+		
+		/*if($tableBody.hasScrollBar()){
+			$preview.css('right', 20)
+		}
+		else{
+			$preview.css('right', 0)
+		}*/
+		$preview.css('right', $tableBody.hasScrollBar() ? 20 : 0)
+	}
+	
+	jui2.table.fn.previewUrl = function(url, pk){
+		var self = this, $self = $(this[0]), defaults = self.defaults, $preview = $self.children('.j-table-preview'), $tableBody = $self.children('.j-table-body');
+		$.ajax({
+			url: url,
+			data: {pk: pk},
+		}).done(function(data) {
+			$preview.empty().append('&lt;div style=&quot;padding: 3px;padding-top: 10px;position: relative&quot;&gt;&lt;i class=&quot;fa fa-times&quot; style=&quot;position:absolute;top:3px;right:3px;cursor:pointer&quot;&gt;&lt;/i&gt;'+data+'&lt;/div&gt;').css({'top': $self.children('.j-table-body').position().top, height: $self.children('.j-table-body').height()})
+			$self.find('.j-table-preview .fa-times').bind('click', function(){
+				$preview.empty();
+			})
+			var min = $tableBody.hasScrollBarHor() ? 20 : 0;
+			/*if($tableBody.hasScrollBarHor()){
+				$preview.css('height', $preview.height()-20)
+			}
+			else{
+				$preview.css('height', $preview.height())
+			}*/
+			
+			$preview.css('height', $preview.height() - min)
+			
+			/*if($tableBody.hasScrollBar()){
+				$preview.css('right', 20)
+			}
+			else{
+				$preview.css('right', 0)
+			}*/
+			$preview.css('right', $tableBody.hasScrollBar() ? 20 : 0)
+		});
+	}
+	
+	jui2.table.fn.showDrop = function(td){
+		var self = this, parent = $(td).parent(), $i = $(td).find('i'), iconPlus = 'fa-plus-square-o', iconMin = 'fa-minus-square-o', pk = $(td).parent().attr('pk')
+
+		if($i.hasClass(iconPlus)){
+			if(!parent.next().attr('pk')){
+				parent.next().remove()
+				parent.children().find('div &gt; i').removeClass(iconMin).addClass(iconPlus)
+			}
+			$i.removeClass(iconPlus).addClass(iconMin)
+			var ev = self.defaults.event
+			var dropEl = $('&lt;tr&gt;&lt;td colspan=&quot;'+parent.children().length+'&quot; class=&quot;j-table-field-drop&quot;&gt;&amp;nbsp;&lt;/td&gt;&lt;/tr&gt;').insertAfter(parent);
+			if(ev.drop)
+				ev.drop(dropEl, self.aaData({___id: pk}).get(), $(td).index())
+		}
+		else{
+			$i.removeClass(iconMin).addClass(iconPlus)
+			parent.next().remove()
+		}
+		//else{
+		//}
+		//console.log(self.aaData({0: pk}).get())
+	}
+	
+	jui2.table.fn.recreate = function(){
+		var self = this;
+		$(self[0]).removeClass('j-body')
+		self.defaults.target = self[0]
+		jui2.table(self.defaults)
+	}
+	
+	jui2.table.fn.getSelected = function(){
+		var self = this;
+		return self.aaData({___id: $(self[0]).children('.j-table-body').children().children().children('tr.j-table-active').attr('pk')}).get()[0];
+	}
+	
+<span id='jui2-splitButton-property-'>}(jQuery));/****js/widget/text.js****/
+</span>(function($){
+	
+	var text = function(opt){
+		var defaults = {id: 'j-no-id'}, self = this;
+		
+		$.extend(!0, defaults, opt)
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+		
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+		
+			opt = opt || {}
+			var defaults = {
+				id: 'j-'+jui2.random(8, 'aA#'),
+				disabled: !1,
+				event: {}
+			}
+			
+			$.extend(!0, defaults, opt);
+			
+			var output = $(jui2.tmpl.tmpl_text(defaults));
+			
+			0 in target &amp;&amp; target.replaceWith(output) || defaults.parent &amp;&amp; $(defaults.parent).append(output) || $('body').append(output);
+			
+			/*if(target.length &gt; 0){
+				target.replaceWith(output);
+			}
+			else if(defaults.parent){
+				$(defaults.parent).append(output)
+			}
+			else{
+				$('body').append(output);
+			}*/
+			
+			self[0] = output;
+			self.length = 1;
+			
+			return self;
+			
+		}
+	}
+	
+	jui2.text = function(opt) {
+        return new text(opt);
+    };
+	
+	jui2.text.fn = text.prototype;
+	
+	jui2.text.fn.disable = function(){
+		var el = this[0], clsDis = 'j-disabled'
+		if(!el.hasClass(clsDis)){
+			el.addClass(clsDis);
+			if(el.data().events){
+				el.data().events._click = el.data().events.click;
+				el.data().events.click = null;
+			}
+		}
+	}
+	
+	jui2.text.fn.enable = function(){
+		var el = this[0], clsDis = 'j-disabled'
+		if(el.hasClass(clsDis)){
+			el.removeClass(clsDis);
+			if(el.data().events){
+				el.data().events.click = el.data().events._click;
+				el.data().events._click = null;
+			}
+		}
+	}
+	
+<span id='jui2-splitButton-property-'>}(jQuery));/****js/widget/textArea.js****/
+</span>(function($){
+	
+	var textArea = function(opt){
+		var defaults = {id: 'j-no-id'}, self = this;
+		
+		$.extend(!0, defaults, opt)
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+		
+			opt = opt || {}
+			var defaults = {
+				id: 'j-'+jui2.random(8, 'aA#'),
+				disabled: !1,
+				event: {},
+				width: 154,
+				height: 75
+			}
+			
+			$.extend(!0, defaults, opt);
+			
+			var output = $(jui2.tmpl.tmpl_textArea(defaults));
+			
+			0 in target &amp;&amp; target.replaceWith(output) || defaults.parent &amp;&amp; $(defaults.parent).append(output) || $('body').append(output);
+			
+			/*if(target.length &gt; 0){
+				target.replaceWith(output);
+			}
+			else if(defaults.parent){
+				$(defaults.parent).append(output)
+			}
+			else{
+				$('body').append(output);
+			}*/
+			/*if(defaults.value)
+				output.find('.j-textArea-editor').html('&lt;p&gt;'+defaults.value+'&lt;/p&gt;')*/
+			
+			output[0].jui2 = self;
+			new Medium({
+				element: output.find('.j-textArea-editor')[0]
+			});
+			self[0] = output[0];
+			self.length = 1;
+		
+			return self;
+			
+		}
+	}
+	
+	jui2.textArea = function(opt) {
+        return new textArea(opt);
+    };
+	
+	jui2.textArea.fn = textArea.prototype;
+	
+	jui2.textArea.fn.disable = function(){
+		$(this[0]).find('.j-textArea-editor').removeAttr('contenteditable')
+	}
+	
+	jui2.textArea.fn.enable = function(){
+		$(this[0]).find('.j-textArea-editor').attr('contenteditable', 'true')
+	}
+	
+	jui2.textArea.fn.val = function(value){
+		var el = $(this[0]).find('.j-textArea-editor')
+		if(value)
+			el.html('&lt;p&gt;'+value+'&lt;/p&gt;')
+		return el.html()
+	}
+	
+	jui2.textArea.fn.reset = function(){
+		$(this[0]).find('.j-textArea-editor').text('')
+	}
+	
+	jui2.textArea.fn.close = function(){
+		this[0].hide()
+	}
+	
+	jui2.textArea.fn.destroy = function(){
+		this[0].remove()
+		this[0] = null;
+	}
+	
+<span id='jui2-splitButton-property-'>}(jQuery));/****js/widget/textField.js****/
+</span>(function($){
+	
+	var textField = function(opt){
+		var defaults = {id: 'j-no-id'}, self = this;
+		
+		$.extend(!0, defaults, opt)
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+		
+			opt = opt || {}
+			var defaults = {
+				id: 'j-'+jui2.random(8, 'aA#'),
+				disabled: !1,
+				event: {}
+			}
+			
+			$.extend(!0, defaults, opt);
+			
+			var output = $(jui2.tmpl.tmpl_textField(defaults));
+			
+			0 in target &amp;&amp; target.replaceWith(output) || defaults.parent &amp;&amp; $(defaults.parent).append(output) || $('body').append(output);
+			
+			/*if(target.length &gt; 0){
+				target.replaceWith(output);
+			}
+			else if(defaults.parent){
+				$(defaults.parent).append(output)
+			}
+			else{
+				$('body').append(output);
+			}*/
+			
+			output[0].jui2 = self;
+			self[0] = output[0];
+			self.length = 1;
+		
+			return self;
+			
+		}
+	}
+	
+	jui2.textField = function(opt) {
+        return new textField(opt);
+    };
+	
+	jui2.textField.fn = textField.prototype;
+	
+	jui2.textField.fn.val = function(val){
+		if(val)
+			$(this[0]).find('input').val(val)
+		return val || $(this[0]).find('input').val();
+	}
+	
+	jui2.textField.fn.reset = function(){
+		$(this[0]).find('input').val('')
+	}
+	
+	jui2.textField.fn.disable = function(){
+		$(this[0]).find('input').attr('readonly', !0)
+		return this;
+	}
+	
+	jui2.textField.fn.enable = function(){
+		$(this[0]).find('input').removeAttr('readonly')
+		return this;
+	}
+	
+	jui2.textField.fn.close = function(){
+		this[0].hide()
+		return this;
+	}
+	
+	jui2.textField.fn.destroy = function(){
+		this[0].remove()
+		this[0] = null;
+	}
+	
+<span id='jui2-splitButton-property-'>}(jQuery));/****js/widget/tooltip.js****/
+</span>(function($){
+	
+	var tooltip = function(opt){
+		var defaults = {id: 'j-no-id'}, self = this;
+		
+		$.extend(!0, defaults, opt)
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+		
+			opt = opt || {}
+			var defaults = {
+				id: 'j-'+jui2.random(8, 'aA#'),
+				disabled: !1,
+				event: {},
+				server: false
+			}
+			
+			$.extend(!0, defaults, opt);
+			if(defaults.server){
+				defaults.url = defaults.content;
+				defaults.content = ''
+			}
+			
+			self.defaults = defaults
+			
+			$(defaults.target).bind('mouseover', function(){
+				
+				self.output = $(jui2.tmpl.tmpl_tooltip(defaults));
+				if(defaults.event.onshow){
+					defaults.event.onshow(self, $(this))
+				}
+				$('body').append(self.output);
+				
+				if(defaults.server){
+					$.ajax({
+						url: defaults.url ,
+					}).done(function(data){
+						self.output.find('.j-tooltip-content').append(data)
+						self.output[0].tether.position()
+					})
+				}
+				
+				self.output[0].tether = jui2.pin({
+					element: self.output,
+					target: $(this),
+					attachment: 'bottom horizontalcenter',
+					targetAttachment: 'top horizontalcenter'
+				})
+				
+				$(this).bind('mouseout', function(){
+					self.output.remove()
+				})
+				//$(defaults.target).children('.j-tooltip').show();
+				//$(defaults.target).children('.j-tooltip').css('z-index', jui2.findHighestZIndex()+1)
+			})
+			
+		}
+	}
+	
+	jui2.tooltip = function(opt) {
+        return new tooltip(opt);
+    };
+	
+	jui2.tooltip.fn = tooltip.prototype;
+	
+	jui2.tooltip.fn.setContent = function(content){
+		this.defaults.content = content
+		if(this.defaults.server){
+			this.defaults.url = content;
+			this.defaults.content = '';
+		}
+	}
+	/*
+	jui2.tooltip.fn.val = function(val){
+		if(val)
+			$(this[0]).find('input').val(val)
+		return val || $(this[0]).find('input').val();
+	}
+	
+	jui2.tooltip.fn.reset = function(){
+		$(this[0]).find('input').val('')
+	}
+	
+	jui2.tooltip.fn.disable = function(){
+		$(this[0]).find('input').attr('readonly', !0)
+		return this;
+	}
+	
+	jui2.tooltip.fn.enable = function(){
+		$(this[0]).find('input').removeAttr('readonly')
+		return this;
+	}
+	
+	jui2.tooltip.fn.close = function(){
+		this[0].hide()
+		return this;
+	}
+	
+	jui2.tooltip.fn.destroy = function(){
+		this[0].remove()
+		this[0] = null;
+	}*/
+	
+<span id='jui2-splitButton-property-'>}(jQuery));/****js/widget/tree.js****/
+</span>(function($){
+<span id='tree'>/** JUI2 tree UI
+</span>	@class tree
+	@extend jui2
+	@param {object} tree options
+	@return {object} jui2 tree object
+	@author Deddy Lasmono Putro
+	@docauthor Deddy Lasmono Putro
+	Example Usage:
+	
+		@example
+		jui2.tree({
+			data: 'path/to/data/url',
+			root: false
+		})
+		
+	To create tree children with click event, you can add event using javascript like in this example:
+	
+		@example
+		jui2.tree({
+			data: 'path/to/data/url',
+			root: false,
+			event: {
+				click: function(tree, record){
+					console.log('You clicked the tree!');
+				}
+			}
+		})
+		
+	This one is the HTML version example:
+	
+		@example
+		&lt;ul jui2=&quot;true&quot; role=&quot;tree&quot; event=&quot;event&quot; data=&quot;path/to/data/url&quot; root=&quot;false&quot;&gt;&lt;/ul&gt;
+		&lt;script&gt;
+			var event = {
+				click: function(tree, record){
+					console.log('You clicked the tree!');
+				}
+			}
+			jui2.create()
+		&lt;/script&gt;
+ */
+	var tree = function(opt){
+		var defaults = {id: 'j-no-id'}, self = this;
+		
+		$.extend(!0, defaults, opt)
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+		
+			/*opt = opt || {}*/
+			opt = opt || {}
+			var defaults = {
+				id: 'j-'+jui2.random(8, 'aA#'),
+				disabled: !1,
+				//defaults.event.click(self.aaData({___id: $(this).attr('data')}).get()[0])
+				event: {},
+				width: '150px',
+				columns: [],
+				server: !1,
+				hidden:[],
+				data: '',
+				root: false
+			}
+			
+			$.extend(!0, defaults, opt);
+			
+			var output = $(jui2.tmpl.tmpl_tree(defaults));
+			
+			
+			output[0].jui2 = self;
+			self[0] = output[0];
+			self.length = 1;
+			output[0].jui2.defaults = defaults
+			
+			0 in target &amp;&amp; target.replaceWith(output) || defaults.parent &amp;&amp; $(defaults.parent).append(output) || $('body').append(output);
+			
+			var jui2Param = output[0].jui2.param = {}
+			jui2Param.sEcho = -1
+			jui2Param.iDisplayLength = 10
+			jui2Param.iDisplayStart = 0
+			jui2Param.iSortCol_0 = 0
+			jui2Param.sSearch = ''
+			jui2Param.sSortDir_0 = ''
+			
+			if(defaults.root){
+				var data = $(jui2.tmpl.tmpl_treeData({data: [[defaults.rootname, defaults.data]]}));
+				output.empty().append(data);
+				data.children('i').click(function(){
+					if($(this).next().next().text()==''){
+						$(this).removeClass('fa-plus-square-o').addClass('fa-minus-square-o')
+						jui2.tree({class: 'j-tree-children', data: $(this).attr('data'), server: true, parent: $(this).next().next(), event: defaults.event});
+					}
+					else{
+						$(this).removeClass('fa-minus-square-o').addClass('fa-plus-square-o')
+						$(this).next().next().text('')
+					}
+				})
+				data.children('.j-tree-head').click(function(){
+					if(defaults.event.click)
+						defaults.event.click()
+				})
+			}
+			else{
+				output[0].jui2.generateData()
+			}
+			
+			return self;
+			
+		}
+	}
+	
+	jui2.tree = function(opt) {
+        return new tree(opt);
+    };
+	
+	jui2.tree.fn = tree.prototype;
+	
+	jui2.tree.fn.disable = function(){
+		
+	}
+	
+	jui2.tree.fn.enable = function(){
+		
+	}
+	
+	jui2.tree.fn.close = function(){
+		this[0].hide()
+	}
+	
+	jui2.tree.fn.destroy = function(){
+		this[0].remove()
+		this[0] = null;
+	}
+	
+	jui2.tree.fn.generateData = function(){
+		var self = this, $self = $(this[0]), param = self.param, defaults = self.defaults
+		self.loadingMask = jui2.loadingMask(self[0])
+		self.param.sEcho++;
+		$.getJSON(defaults.data, param).done(function(data){
+			if(param.sEcho==data.sEcho){
+				defaults.items = new Array();
+				param.totalPage = (+data.iTotalRecords)-1;
+				
+				jui2.clearNullFromJson(data.aaData);
+				
+				data.aaData = jui2.arrayToJson(data.aaData);
+				self.aaData = TAFFY(data.aaData)
+				for(i in data){
+					if(i!='aaData'){
+						param[i] = data[i]
+					}
+				}
+				/*$.each(data, function(i, val){
+					console.log(i);
+					if(i^'aaData')
+						param[i] = val
+				})*/
+				
+				var dataToBeShowed = [], tmpdataToBeShowed = []
+				$.extend(!0, dataToBeShowed, self.aaData().get());
+				//var dataToBeShowed = (defaults.server == !0) ? self.aaData().start(0).limit(param.iDisplayLength).get() : self.aaData().start(param.iDisplayStart).limit(param.iDisplayLength).get();
+				$.extend(!0, tmpdataToBeShowed, dataToBeShowed)
+				if(defaults.custom)
+					for(var i=0;i&lt;dataToBeShowed.length;i++){
+						for(j in defaults.custom){
+							tmpdataToBeShowed[i][j] = defaults.custom[j](dataToBeShowed[i])
+						}
+					}
+				var data = $(jui2.tmpl.tmpl_treeData({data: tmpdataToBeShowed}));
+				$self.empty().append(data);
+				data.children('.j-tree-head').click(function(){
+					if(defaults.event.click)
+						defaults.event.click(self, self.aaData({___id: $(this).attr('data')}).get()[0])
+				})
+				data.children('i').click(function(){
+					if($(this).next().next().text()==''){
+						$(this).removeClass('fa-plus-square-o').addClass('fa-minus-square-o')
+						var childrenUrl = defaults.childrenurl ? defaults.childrenurl(self.aaData({___id: $(this).next().attr('pk')}).get()[0]) : $(this).attr('data')
+						jui2.tree({class: 'j-tree-children', data: $(this).attr('data'), server: true, parent: $(this).next().next(), event: defaults.event});
+					}
+					else{
+						$(this).removeClass('fa-minus-square-o').addClass('fa-plus-square-o')
+						$(this).next().next().text('')
+					}
+				})
+				
+			}
+		}).always(function(){
+			self.loadingMask.destroy()
+		})
+	}
+	
+<span id='tree-property-'>}(jQuery));/****js/widget/windowPanel.js****/
+</span>(function($){
+	
+	var windowPanel = function(opt){
+		var defaults = {id: 'j-no-id'}, self = this;
+		
+		$.extend(!0, defaults, opt)
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+		
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+		
+			opt = opt || {}
+			var defaults = {
+				id: 'j-'+jui2.random(8, 'aA#'),
+				title: '',
+				icon: '',
+				disabled: !1,
+				event: {},
+				taskbar: !1
+			}
+			
+			$.extend(!0, defaults, opt);
+			
+			var output = $(jui2.tmpl.tmpl_windowPanel(defaults));
+			
+			0 in target &amp;&amp; target.replaceWith(output) || defaults.parent &amp;&amp; $(defaults.parent).append(output) || $('body').append(output);
+			
+			/*if(target.length &gt; 0){
+				target.replaceWith(output);
+			}
+			else if(defaults.parent){
+				$(defaults.parent).append(output)
+			}
+			else{
+				$('body').append(output);
+			}*/
+			
+			typeof defaults.event.click == 'function' &amp;&amp;
+				output.click(defaults.event.click);
+				
+			/*if(defaults.taskbar){
+				jui2.button({label: defaults.title, parent: $(defaults.taskbar)})
+			}*/
+			self.defaults = defaults;
+			output[0].jui2 = self;
+			
+			//output[0].jui2.defaults = defaults;
+			
+			self[0] = output[0];
+			self.length = 1;
+			return self;
+			
+		}
+	}
+	
+	jui2.windowPanel = function(opt) {
+        return new windowPanel(opt);
+    };
+	
+	jui2.windowPanel.fn = windowPanel.prototype;
+	
+	jui2.windowPanel.fn.minimize = function(){
+		var self = this, defaults = this[0].jui2.defaults;
+		if(defaults.taskbar){
+			jui2.button({label: defaults.title, parent: $(defaults.taskbar),
+				event : {
+					click: function(el){
+						$(self[0]).show()
+						el.destroy()
+					}
+				}})
+			$(this[0]).hide()
+		}/*
+		var defaults = this[0].jui2.defaults
+		defaults.taskbar &amp;&amp;
+			~function(defaults, $el){
+				jui2.button({label: defaults.title, parent: $(defaults.taskbar),
+					event : {
+						click: function(el){
+							$el.show()
+							el.destroy()
+						}
+					}
+				})
+				$el.hide()
+			}(defaults, $(self[0]))*/
+	}
+	
+	jui2.windowPanel.fn.destroy = function(){
+		this[0].remove()
+		this[0] = null;
+	}
+	
+<span id='tree-property-'>}(jQuery));/****js/widget/yearPicker.js****/
+</span>(function($){
+	
+	var yearPicker = function(opt){
+		var defaults = {id: 'j-no-id'}, self = this;
+		
+		$.extend(!0, defaults, opt)
+		
+		var target = defaults.target ? typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target) : $('#'+defaults.id)
+
+		/*if(defaults.target)
+			var target = typeof defaults.target == 'string' ? $('#'+defaults.target):$(defaults.target)
+		else
+			var target = $('#'+defaults.id)*/
+		
+		if(target.hasClass('j-body')){
+			return target[0].jui2;
+			/*self[0] = target;
+			self.length = 1;
+			
+			return self;*/
+		}
+		else{
+			opt = opt || {}
+			var defaults = {
+				id: 'j-'+jui2.random(8, 'aA#'),
+				disabled: !1,
+				event: {},
+				parent: 'body',
+				year: (+moment().format('YYYY'))
+			}
+			
+			$.extend(!0, defaults, opt);
+			
+			var output = $(jui2.tmpl.tmpl_yearPicker(defaults));
+			
+			0 in target &amp;&amp; target.replaceWith(output) || defaults.parent &amp;&amp; $(defaults.parent).append(output) || $('body').append(output);
+			
+			/*if(target.length &gt; 0){
+				target.replaceWith(output);
+			}
+			else if(defaults.parent){
+				$(defaults.parent).append(output)
+			}
+			else{
+				$('body').append(output);
+			}*/
+			//generate top toolbar
+			jui2.bar({
+				parent: output.find('.j-yearPicker-top-toolbar'),
+				'class': 'j-bg-inherit',
+				items: ['-', {
+					role: 'button',
+					icon: 'fa-chevron-left',
+					'class': 'j-bg-inherit j-border-inherit',
+					event:{
+						click: function(){
+							output[0].jui2.changeYear(-10)
+						}
+					}
+				}, '-', {
+					role: 'button',
+					icon: 'fa-chevron-right',
+					'class': 'j-bg-inherit j-border-inherit',
+					event:{
+						click: function(){
+							output[0].jui2.changeYear(10)
+						}
+					}
+				}, '-']
+			})
+			
+			self.value = defaults.year
+			output[0].jui2 = self;
+			
+			$td = output.find('tbody td');
+			
+			$td.click(function(){
+				var el = $(this), clsSel = 'j-yearPicker-selected'
+				output[0].jui2.value = el.text();
+				$td.removeClass(clsSel);
+				el.addClass(clsSel);
+			})
+			
+			self[0] = output[0];
+			self.length = 1;
+			
+			return self;
+			
+		}
+	}
+	
+	jui2.yearPicker = function(opt) {
+        return new yearPicker(opt);
+    };
+	
+	jui2.yearPicker.fn = yearPicker.prototype;
+	
+	jui2.yearPicker.fn.disable = function(){
+		/*if(!this.overlay)
+			this.overlay = jui2.overlay({overlayTarget: this[0]})*/
+			
+		this.overlay = !this.overlay &amp;&amp; jui2.overlay({overlayTarget: this[0]})
+	}
+	
+	jui2.yearPicker.fn.enable = function(){
+		/*if(this.overlay){
+			this.overlay.destroy();
+			this.overlay = null
+		}*/
+		this.overlay &amp;&amp; (
+			this.overlay.destroy(),
+			this.overlay = null
+		)
+	}
+	
+	jui2.yearPicker.fn.changeYear = function(offset){
+		var el = $(this[0]).find('tbody td'), self = this, clsSel = 'j-yearPicker-selected';
+
+		el.removeClass(clsSel);
+		el.each(function(){
+			var el = $(this);
+			el.text((+el.text())+offset)
+			el.text() == self.value &amp;&amp; el.addClass(clsSel);
+			/*if(el.text()==self.value)
+				el.addClass(clsSel);*/
+		})
+	}
+	
+	jui2.yearPicker.fn.close = function(){
+		$(this[0]).hide()
+	}
+	
+	jui2.yearPicker.fn.destroy = function(){
+		$(this[0]).remove()
+	}
+	
+<span id='tree-property-'>}(jQuery));/****js/create.js****/
+</span>(function($){
+	jui2.adapter = {}
+	var adp = jui2.adapter
+	adp.table = function(vr, selector){
+		$(selector+'table[jui2=true][role=table]').each(function(){
+			var data = {}
+			$.each(this.attributes, function(i, val){
+				
+				data[val.name] = ['drop', 'server', 'jui2', 'hidden'].indexOf(val.name) &gt; -1 ? 
+					eval(val.value) 
+				: ['event', 'topbar', 'custom', 'preview', 'editable', 'save'].indexOf(val.name) &gt; -1 ? 
+					vr[val.value]
+				:
+					val.value
+				/*
+				if(val.name=='drop' || val.name == 'server' || val.name == 'jui2' || val.name == 'hidden')
+					data[val.name] = eval(val.value);
+				else if(val.name=='event' || val.name == 'topbar' || val.name == 'custom'){
+					data[val.name] = window[val.value]
+				}
+				else
+					data[val.name] = val.value;*/
+			})
+			if(!data.server){
+				data.data = eval(data.data)
+			}
+			data.vr = selector
+			
+			data.colCount = $(this).find('tbody td').length;
+			data.columns = []
+			$(this).find('thead tr').each(function(i, val){
+				data.columns[i] = [];
+				//var col = {};
+				$(this).find('td').each(function(){
+					var el =$(this);
+					data.columns[i].push({
+						text: el.html(),
+						colspan: el.attr('colspan')?el.attr('colspan'):0,
+						rowspan: el.attr('rowspan')?el.attr('rowspan'):0,
+						width: el.attr('width')?el.attr('width'):'auto',
+					})
+				})
+			})
+			data.target = this;
+			jui2.table(data);
+		})
+	}
+	
+	adp.tree = function(vr, selector){
+		$(selector+'ul[jui2=true][role=tree]').each(function(){
+			var data = {}
+			$.each(this.attributes, function(i, val){
+				
+				data[val.name] = ['server', 'jui2', 'root'].indexOf(val.name) &gt; -1 ? 
+					eval(val.value) 
+				: ['event'].indexOf(val.name) &gt; -1 ? 
+					vr[val.value]
+				:
+					val.value
+			})
+			data.vr = selector
+
+			data.target = this;
+			jui2.tree(data);
+		})
+	}
+	
+	adp.textField = function(vr, selector){
+		$(selector+'[jui2=true][role=textField]').each(function(){
+			var data = {}
+			
+			$.each(this.attributes, function(i, val){
+				data[val.name] = val.name == 'event' ? vr[val.value] : val.value;
+				/*if(val.name=='event')
+					data[val.name] = window[val.value]
+				else
+					data[val.name] = val.value;*/
+			})
+			data.vr = selector
+			
+			data.target = this;
+			jui2.textField(data);
+		})
+	}
+	
+	adp.textArea = function(vr, selector){
+		$(selector+'[jui2=true][role=textArea]').each(function(){
+			var data = {}
+			
+			$.each(this.attributes, function(i, val){
+				data[val.name] = val.name == 'event' ? vr[val.value] : val.value;
+				/*if(val.name=='event')
+					data[val.name] = window[val.value]
+				else
+					data[val.name] = val.value;*/
+			})
+			data.vr = selector
+			
+			data.target = this;
+			jui2.textArea(data);
+		})
+	}
+	
+	adp.passwordField = function(vr, selector){
+		$(selector+'[jui2=true][role=passwordField]').each(function(){
+			var data = {}
+			
+			$.each(this.attributes, function(i, val){
+				data[val.name] = val.name == 'event' ? vr[val.value] : val.value;
+				/*if(val.name=='event')
+					data[val.name] = window[val.value]
+				else
+					data[val.name] = val.value;*/
+			})
+			data.vr = selector
+			
+			data.target = this;
+			jui2.passwordField(data);
+		})
+	}
+	
+	adp.datePicker = function(vr, selector){
+		$(selector+'[jui2=true][role=datePicker]').each(function(){
+			var data = {}
+			
+			$.each(this.attributes, function(i, val){
+				data[val.name] = val.name == 'event' ? vr[val.value] : val.value;
+				/*if(val.name=='event')
+					data[val.name] = window[val.value]
+				else
+					data[val.name] = val.value;*/
+			})
+			data.vr = selector
+
+			data.target = this;
+			jui2.datePicker(data);
+		})
+	}
+	
+	adp.comboField = function(vr, selector){
+		$(selector+'[jui2=true][role=comboField]').each(function(){
+			var data = {}
+			for(var i = this.attributes.length, attr = this.attributes;i--;){
+				val = attr[i]
+				
+				val.name == 'data' &amp;&amp; (data['items'] = val.value) ||
+				(data[val.name] = ['items', 'display', 'display-name'].indexOf(val.name)^-1 &amp;&amp;
+					eval(val.value)
+				|| val.name=='data' &amp;&amp;
+					val.value
+				|| val.name=='event' &amp;&amp;
+					vr[val.value]
+				||
+					val.value)
+			}
+			data.vr = selector
+			
+			data.target = this;
+			jui2.comboField(data);
+		})
+	}
+	
+	adp.radioField = function(vr, selector){
+		$(selector+'[jui2=true][role=radioField]').each(function(){
+			var data = {}
+			
+			$.each(this.attributes, function(i, val){
+				switch(val.name){
+					case 'items': 
+						data['items'] = eval(val.value);
+						 break;
+					case 'items-from-var': 
+						data['items'] = vr[val.value];
+						 break;
+					case 'event': 
+						data[val.name] = vr[val.value];
+						 break;
+					default:
+						data[val.name] = val.value;
+						
+				}
+				/*
+				if(val.name=='items')
+					data['items'] = eval(val.value)
+				else if(val.name=='items-from-var')
+					data['items'] = window[val.value]
+				else if(val.name=='event')
+					data[val.name] = window[val.value]
+				else
+					data[val.name] = val.value;*/
+			})
+			data.vr = selector
+			
+			data.target = this;
+			jui2.radioField(data);
+		})
+	}
+	
+	adp.checkboxField = function(vr, selector){
+		$(selector+'[jui2=true][role=checkboxField]').each(function(){
+			var data = {}
+			
+			$.each(this.attributes, function(i, val){
+				switch(val.name){
+					case 'items': 
+						data['items'] = eval(val.value);
+						 break;
+					case 'items-from-var': 
+						data['items'] = vr[val.value];
+						 break;
+					case 'event': 
+						data[val.name] = vr[val.value];
+						 break;
+					default:
+						data[val.name] = val.value;
+						
+				}
+				/*
+				if(val.name=='items')
+					data['items'] = eval(val.value)
+				else if(val.name=='items-from-var')
+					data['items'] = window[val.value]
+				else if(val.name=='event')
+					data[val.name] = window[val.value]
+				else
+					data[val.name] = val.value;*/
+			})
+			data.vr = selector
+			
+			data.target = this;
+			jui2.checkboxField(data);
+		})
+	}
+	
+	adp.button = function(vr, selector){
+		$(selector+'[jui2=true][role=button]').each(function(){
+			var data = {}
+			
+			$.each(this.attributes, function(i, val){
+				data[val.name] = val.name=='event' ? vr[val.value] :val.value;
+				/*if(val.name=='event')
+					data[val.name] = window[val.value]
+				else
+					data[val.name] = val.value;*/
+			})
+			data.vr = selector
+
+			data.target = this;
+			jui2.button(data);
+		})
+	}
+	
+	adp.menuButton = function(vr, selector){
+		$(selector+'[jui2=true][role=menuButton]').each(function(){
+			var data = {}
+			
+			$.each(this.attributes, function(i, val){
+				data[val.name] = val.name=='event' || val.name=='menu' ? vr[val.value] :val.value;
+				/*if(val.name=='event')
+					data[val.name] = window[val.value]
+				else
+					data[val.name] = val.value;*/
+			})
+			data.vr = selector
+
+			data.target = this;
+			jui2.menuButton(data);
+		})
+	}
+	
+	adp.splitButton = function(vr, selector){
+		$(selector+'[jui2=true][role=menuButton]').each(function(){
+			var data = {}
+			
+			$.each(this.attributes, function(i, val){
+				data[val.name] = val.name=='event' || val.name=='menu' ? vr[val.value] :val.value;
+				/*if(val.name=='event')
+					data[val.name] = window[val.value]
+				else
+					data[val.name] = val.value;*/
+			})
+			data.vr = selector
+
+			data.target = this;
+			jui2.menuButton(data);
+		})
+	}
+	
+	adp.bar = function(vr, selector){
+		$(selector+'[jui2=true][role=bar]').each(function(){
+			var data = {}
+			
+			$.each(this.attributes, function(i, val){
+				data[val.name] = (val.name=='event' || val.name=='items') ? vr[val.value] : val.value;
+				/*if(val.name=='event' || val.name=='items')
+					data[val.name] = window[val.value]
+				else
+					data[val.name] = val.value;*/
+			})
+			data.vr = selector
+
+			data.target = this;
+			jui2.bar(data);
+		})
+	}
+	
+	jui2.create = function(globalVar){
+		var vr = window[globalVar] || window, selector = globalVar ? '#'+globalVar+' ' : '';
+		$.each(adp, function(i, val){
+			adp[i](vr, selector)
+		})
+	}
+}(jQuery))</pre>
+</body>
+</html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Javascript User Interface: Home</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <script src="../jquery.js"></script>
+    <script src="../jui2.lib.min.js"></script>
+    <script src="../jui2.tmp.min.js"></script>
+    <script src="../jui2.ui.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+    <link rel="stylesheet" type="text/css" href="../css/jui2.min.css" />
+  	<link rel="stylesheet" type="text/css" href="css/font-awesome.min.css" />
+    <style>
+    .code-caption {
+      font-style: unset;
+    }
+    .livePreview {
+      width: unset;
+      border: 1px solid #ddd;
+      padding: 34px 24px 14px;
+      position: relative;
+      margin: 14px 0px;
+    }
+
+    .livePreview::after {
+      content: 'Preview';
+      position: absolute;
+      left: -1px;
+      top: -1px;
+      background: #F6F6F6;
+      border: 1px solid #ddd;
+      color: #0095dd;
+      border-bottom-right-radius: 3px;
+      font-family: helvetica,arial,verdana,sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 4px;
+    }
+
+    .prettyprint{
+      width: unset;
+      padding: 30px 12px 10px;
+      position: relative;
+    }
+
+    .prettyprint::after {
+      content: 'Code';
+      position: absolute;
+      left: -1px;
+      top: -1px;
+      background: #F6F6F6;
+      border: 1px solid #ddd;
+      color: #0095dd;
+      border-bottom-right-radius: 3px;
+      font-family: helvetica,arial,verdana,sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 4px;
+    }
+    </style>
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: dateTimeField.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @classdesc Datetimefield custom web component
+ * @class dateTimeField
+ * @property {string} format Datetime formatting for datetimefield value, format conventions using momentjs formatting conventions see &lt;a href="http://momentjs.com/docs/#/displaying/">http://momentjs.com/docs/#/displaying/&lt;/a>
+ * @example &lt;caption>Datetimefield widget basic usage&lt;/caption>
+ * &lt;j-datetimefield id="datetime">Datetime&lt;/j-datetimefield>
+ * @example &lt;caption>Datetimefield formatting&lt;/caption>
+ * &lt;j-datetimefield format="DD MMM YYYY hh:mm">Datetime&lt;/j-datetimefield>
+ * @augments dateField
+ */
+//TODO: clearing and trimming code
+
+(function($){
+
+	var proto = Object.create(HTMLElement.prototype)
+
+	proto.createdCallback = function() {
+
+		if(!$(this).attr('format')){
+			$(this).attr('format', 'DD/MM/YYYY hh:mm')
+		}
+
+		jui2.ui.dateField.proto.createdCallback.call(this)
+
+		var $self = $(this), $table, self = this, id = this.juiid
+
+		$table = $self.children('table')
+
+		$self.find('table').css('display', 'none');
+
+		$self.on('calendarshow', function(e, $elTable){
+			$elTable.find('.j-datetime-item').remove()
+			$elTable.find('thead tr:first-child').append('&lt;th rowspan="2" class="j-datetime-item j-border-bot3" style="text-align: center; width: 100px;">Time&lt;/th>')
+			$elTable.find('tbody tr:first-child').append('&lt;td rowspan="5" class="j-datetime-item">&lt;/td>')
+			var initVal = $self.val(),
+			dt = initVal != '' ? moment(initVal, $self.attr('format')).format('hh:mm').split(':') : moment().format('hh:mm').split(':');
+			$elTable.find('tbody tr:first-child .j-datetime-item').append(jui2.tmpl['dateTime']({
+				hour: dt[0],
+				minute: dt[1]
+			}))
+			this.timeControl($elTable)
+
+			if($elTable.parent().width()&lt;250)
+				$elTable.parent().css('width', $table.width()+100)
+			else
+				$elTable.parent().css('width', $table.width())
+		})
+
+		$table.undelegate('td', 'click');
+
+		$table.delegate('td', 'click', function(e){
+			e.stopPropagation();
+			var elNum = parseInt(this.innerHTML), $this = $(this),
+			hour = $table.find('tbody tr:first-child .j-datetime-item .j-datetime-hour'),
+			minute = $table.find('tbody tr:first-child .j-datetime-item .j-datetime-minute')
+
+			if($this.index()&lt;7 &amp;&amp; $this.parent().parent().parent().parent().hasClass('j-modal-body')){
+				if($this.parent().index()==0){
+					if($this.nextAll().filter(function( index ) {
+						return parseInt(this.innerHTML) &lt; elNum
+					}).length > 0){
+						$table.find('thead tr:first-child th:nth-child(2)').text(moment($table.find('thead tr:first-child th:nth-child(2)').text(), "MMMM YYYY").subtract(1, 'month').format('MMMM YYYY'))
+					}
+				}
+				else if($this.parent().index()==($this.parent().siblings().length)){
+					if($this.prevAll().filter(function( index ) {
+						return parseInt(this.innerHTML) > elNum
+					}).length > 0){
+						$table.find('thead tr:first-child th:nth-child(2)').text(moment($table.find('thead tr:first-child th:nth-child(2)').text(), "MMMM YYYY").add(1, 'month').format('MMMM YYYY'))
+					}
+				}
+				$self.val(moment(('00'+elNum).slice(-2)+' '+$table.find('thead tr:first-child th:nth-child(2)').text()+' '+hour.val()+':'+minute.val(), 'DD MMMM YYYY hh:mm').format($self.attr('format')))
+				var modal = $table.parent().parent()
+				$table.detach().appendTo($self);
+				modal.remove();
+				$table.hide();
+				/**
+				 * Fires when datetime selected
+				 * @event select
+				 * @param {object} event Event object
+				 * @param  {String} value Selected value
+				 * @memberof datetimeField
+				 * @example
+				 * &lt;j-datetimefield id="myDatetimefield1">Datetime&lt;/j-datetimefield>
+				 * &lt;script>
+				 * $('#myDatetimefield1').on('select', function(e, value){
+				 * 	console.log(value) // will print value you selected from datefield in javascript console
+				 * })
+				 * &lt;/script>
+				 */
+				$self.triggerHandler('select', [$self.val()]);
+			}
+		})
+	}
+
+	proto.timeControl = function($elTable){
+		var topArrow = $elTable.find('tbody tr:first-child .j-datetime-item table tr:first-child i');
+		var botArrow = $elTable.find('tbody tr:first-child .j-datetime-item table tr:nth-child(3) i');
+		var hour = $elTable.find('tbody tr:first-child .j-datetime-item .j-datetime-hour')
+		var minute = $elTable.find('tbody tr:first-child .j-datetime-item .j-datetime-minute')
+		topArrow.eq(0).click(function(){
+			var val = parseInt(hour.val());
+			val++;
+			if(val==24)
+				val=0
+			hour.val(val)
+		})
+		topArrow.eq(1).click(function(){
+			var val = parseInt(minute.val())
+			val++
+			if(val==60)
+				val=0
+			minute.val(val)
+		})
+		botArrow.eq(0).click(function(){
+			var val = parseInt(hour.val());
+			val--;
+			if(val==-1)
+				val=23
+			hour.val(val)
+		})
+		botArrow.eq(1).click(function(){
+			var val = parseInt(minute.val())
+			val--
+			if(val==-1)
+				val=59
+			minute.val(val)
+		})
+	}
+
+	proto.prevMonth = function(table){
+		var time = table.find('tbody tr:first-child .j-datetime-item').clone()
+		jui2.ui.dateField.proto.prevMonth.call(this, table);
+		table.find('tbody tr:first-child').append(time)
+		this.timeControl(table)
+	}
+
+	proto.nextMonth = function(table){
+		var time = table.find('tbody tr:first-child .j-datetime-item').clone()
+		jui2.ui.dateField.proto.nextMonth.call(this, table);
+		table.find('tbody tr:first-child').append(time)
+		this.timeControl(table)
+	}
+
+	proto.attributeChangedCallback = function(attrName, oldVal, newVal){
+		var tagName = this.tagName, attrChange = jui2.attrChange, key = tagName.toLowerCase()+'_'+attrName;
+		if(attrChange[key])
+			attrChange[key](this, oldVal, newVal);
+    	else if(attrChange[attrName] &amp;&amp; this.enabledAttrChange.indexOf(attrName) > -1)
+			attrChange[attrName](this, oldVal, newVal);
+	}
+
+	jui2.ui.dateTimeField = {
+		widget: document.registerElement('j-datetimefield',  {
+			prototype: proto
+		}),
+		proto: proto
+	}
+
+}(jQuery))
+;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="base.html">base</a></li><li><a href="button.html">button</a></li><li><a href="colorPicker.html">colorPicker</a></li><li><a href="comboField.html">comboField</a></li><li><a href="dataView.html">dataView</a></li><li><a href="dateField.html">dateField</a></li><li><a href="dateTimeField.html">dateTimeField</a></li><li><a href="editor.html">editor</a></li><li><a href="gantt.html">gantt</a></li><li><a href="hslider.html">hslider</a></li><li><a href="loader%2520@extension%2520table.html">loader @extension table</a></li><li><a href="modal.html">modal</a></li><li><a href="numberField.html">numberField</a></li><li><a href="pagination%2520@extension%2520table.html">pagination @extension table</a></li><li><a href="passwordField.html">passwordField</a></li><li><a href="pivotIntersection%2520@extension%2520table.html">pivotIntersection @extension table</a></li><li><a href="pivotLeft%2520@extension%2520table.html">pivotLeft @extension table</a></li><li><a href="pivotTop%2520@extension%2520table.html">pivotTop @extension table</a></li><li><a href="progressbar.html">progressbar</a></li><li><a href="radioField.html">radioField</a></li><li><a href="table.html">table</a></li><li><a href="tableFilter.html">tableFilter</a></li><li><a href="tableInPlaceForm%2520@extension%2520table.html">tableInPlaceForm @extension table</a></li><li><a href="textArea.html">textArea</a></li><li><a href="textField.html">textField</a></li><li><a href="timeField.html">timeField</a></li><li><a href="tree.html">tree</a></li><li><a href="wysiwyg.html">wysiwyg</a></li></ul><h3>Events</h3><ul><li><a href="button.html#.event:click">click</a></li><li><a href="comboField.html#.event:afterdraw">afterdraw</a></li><li><a href="comboField.html#.event:select">select</a></li><li><a href="dataView.html#.event:afterdraw">afterdraw</a></li><li><a href="dateField.html#.event:select">select</a></li><li><a href="datetimeField_.html#.event:select">select</a></li><li><a href="table.html#.event:afterdraw">afterdraw</a></li><li><a href="tableInPlaceForm%252520@extension%252520table.html#.event:cancel">cancel</a></li><li><a href="tableInPlaceForm%252520@extension%252520table.html#.event:submit">submit</a></li><li><a href="timeField.html#.event:select">select</a></li></ul><h3>Namespaces</h3><ul><li><a href="jui2.html">jui2</a></li><li><a href="jui2.ui.html">ui</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Jun 29 2016 16:28:25 GMT+0700 (SE Asia Standard Time)
+</footer>
+
+<script>
+  prettyPrint();
+  $('nav h3:contains(Events)').hide().next().hide();
+  $('nav h3:contains(Classes)').text('Widgets');
+
+  /*code for example*/
+  if($('.page-title:contains(Source)').length == 0){
+    $('.prettyprint code').each(function(i, val){
+      $('<div class="livePreview"></div>').insertAfter($(this).parent())
+      $(this).parent().next().append($(this).text())
+    })
+
+    $('.code-caption:contains(nopreview)').each(function(i, val){
+      $(this).next().next().remove()
+      $(this).remove()
+    })
+  }
+  /*end of code for example*/
+  if($('.class-description:contains(custom web component)').length>0){
+    $('.page-title').text($('.page-title').text().replace('Class', 'Widget'))
+    $('h2:contains(Constructor)').hide().next().hide()
+  }
+
+  $('li:contains(@extension)').each(function(i, val){
+    var parentText = $(this).text().split('@extension')[1].trim(), parent = $('li').filter(function(
+){
+      return $(this).text().trim() === parentText
+    })
+    $(this).detach().insertAfter(parent).css({
+      'padding-left': '15px',
+      'padding-top': '6px',
+      'border-left': '1px solid #ddd',
+      'margin': '0px'
+    }).children().text($(this).text().split('@extension')[0].trim())
+  })
+
+  if($('.page-title:contains(@extension)').length>0){
+    var el = $('.page-title:contains(@extension)'), text = el.text()
+    el.text(text.split('@extension')[1].trim()+' Extension: '+text.split('@extension')[0].replace('Class: ', ''));
+    $('header h2').text($('header h2').text().split('@extension')[0].trim())
+    $('h2').filter(function(){
+      return $(this).text()==='Constructor';
+    }).hide().next().hide()
+  }
+</script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
